@@ -362,7 +362,7 @@ class OpenMrsAPI {
             }
 
           if (data["partner_hivtest_done"]) {
-            
+
             obs.push({
                 "concept": uuids.obs.partner_hivtest_done,
                 "value": uuids.odkHIVTestDone[data["partner_hivtest_done"]]
@@ -377,13 +377,13 @@ class OpenMrsAPI {
 
           // if (data["anc_art_initiation"]) {
           //   obs.push({
-          //       "concept": uuids.obs.anc_art_initation,
+          //       "concept": uuids.obs.anc_art_initiation,
           //       "value": uuids.odkARTInitiation[data["anc_art_initiation"]]
           //     })
           //   }
           //   else {
           //     obs.push({
-          //       "concept": uuids.obs.anc_art_initation,
+          //       "concept": uuids.obs.anc_art_initiation,
           //       "value": uuids.odkARTInitiation["66"]
           //     })
           //   }
@@ -511,54 +511,54 @@ class OpenMrsAPI {
           }
 
 
-          if (data["vl_test_done"]) {
-            console.log("==============Result Found=============")
+          // if (data["vl_test_done"]) {
+          //   console.log("==============Result Found=============")
 
-            console.log(uuids.odkVLTestDone[data["vl_test_done"]])
-            obs.push({
-              "concept": uuids.obs.vl_test_done,
-                "value": uuids.odkVLTestDone[data["vl_test_done"]]
-              })
-            }
-          else {
-            console.log("==============No result=============")
+          //   console.log(uuids.odkVLTestDone[data["vl_test_done"]])
+          //   obs.push({
+          //     "concept": uuids.obs.vl_test_done,
+          //       "value": uuids.odkVLTestDone[data["vl_test_done"]]
+          //     })
+          //   }  
+          // else {
+          //   console.log("==============No result=============")
 
-            console.log(uuids.odkVLTestDone["66"])
+          //   console.log(uuids.odkVLTestDone["66"])
 
-            obs.push({
-              "concept": uuids.obs.vl_test_done,
-              "value": uuids.odkVLTestDone["66"]
-            })
-          }
+          //   obs.push({
+          //     "concept": uuids.obs.vl_test_done,
+          //     "value": uuids.odkVLTestDone["66"]
+          //   })
+          // }
 
-          if (data["vl_test_date"]) {
-            console.log("VL test Date Missing")
-            obs.push({
-              "concept": uuids.obs.vl_test_date,
-                "value": data["vl_test_date"]
-              })
-          }
+          // if (data["vl_test_date"]) {
+          //   console.log("VL test Date Missing")
+          //   obs.push({
+          //     "concept": uuids.obs.vl_test_date,
+          //       "value": data["vl_test_date"]
+          //     })
+          // }
 
 
-          if (data["vl_test_result"]) {
-            console.log("==============Result Found=============")
+          // if (data["vl_test_result"]) {
+          //   console.log("==============Result Found=============")
 
-            console.log(uuids.odkVLTestResult[data["vl_test_result"]])
-            obs.push({
-              "concept": uuids.obs.vl_test_result,
-                "value": uuids.odkVLTestResult[data["vl_test_result"]]
-              })
-            }
-          else {
-            console.log("==============No result=============")
+          //   console.log(uuids.odkVLTestResult[data["vl_test_result"]])
+          //   obs.push({
+          //     "concept": uuids.obs.vl_test_result,
+          //       "value": uuids.odkVLTestResult[data["vl_test_result"]]
+          //     })
+          //   }
+          // else {
+          //   console.log("==============No result=============")
 
-            console.log(uuids.odkVLTestDone["66"])
+          //   console.log(uuids.odkVLTestDone["66"])
 
-            obs.push({
-              "concept": uuids.obs.vl_test_result,
-              "value": uuids.odkVLTestResult["66"]
-            })
-          }
+          //   obs.push({
+          //     "concept": uuids.obs.vl_test_result,
+          //     "value": uuids.odkVLTestResult["66"]
+          //   })
+          // }
 
 
           return obs
