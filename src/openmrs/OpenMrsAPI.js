@@ -299,18 +299,19 @@ class OpenMrsAPI {
 
 
         if (data["anc_first_hiv_test_status"]) {
-            if (data["anc_first_hiv_test_status"] == "1") {
-                obs.push({
-                    "concept": uuids.obs.anc_first_visit,
-                    "value": uuids.odkYesNo[data["1"]]
-                })
-            }
-            if (data["anc_first_hiv_test_status"] == "0") {
-                obs.push({
-                    "concept": uuids.obs.anc_first_visit,
-                    "value": uuids.odkYesNo["2"]
-                })
-            }
+          if (data["anc_first_hiv_test_status"] == "1") {
+            console.log(data["anc_first_hiv_test_status"])
+              obs.push({
+                  "concept": uuids.obs.anc_first_visit,
+                  "value": uuids.odkYesNo["1"]
+              })
+          }
+          if (data["anc_first_hiv_test_status"] == "0") {
+              obs.push({
+                  "concept": uuids.obs.anc_first_visit,
+                  "value": uuids.odkYesNo["2"]
+          })
+        }
 
         } else {
             obs.push({
