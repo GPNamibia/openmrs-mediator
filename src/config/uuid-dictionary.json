@@ -32,7 +32,7 @@
         "anc_gravida": "5624AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "anc_art_initiation": "edd526f0-7780-11ea-ab12-0800200c9a66",
         "art_int_refused_reason": "163322AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "art_int_refused_reason_missing": "0117ec63-6fc8-4b37-99e9-7f6d99652852",
+        "art_int_status_refused_reason_missing": "0117ec63-6fc8-4b37-99e9-7f6d99652852",
         "art_int_status": "6e62bf7e-2107-4d09-b485-6e60cbbb2d08",
         "art_number_missing": "43cb14fe-6f06-4b40-81f0-a712b805a74d",
         "art_start_date": "159599AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -40,12 +40,8 @@
         "hiv_test_result": "159427AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "hiv_test_status": "164401AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "vl_test_done": "163310AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "vl_test_date":"",
+        "vl_test_date":"163281AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "vl_test_result":"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-
-
-
-
     },
     "identifier_type":{
         "ptracker_number": "4da0a3fe-e546-463f-81fa-084f098ff06c",
@@ -115,6 +111,12 @@
       "1": "164180AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "0": "160530AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "2": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
+      "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+    "odkFirstVisit": {
+      "1": "164180AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "0": "160530AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     }
 }

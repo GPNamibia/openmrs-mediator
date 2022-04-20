@@ -320,7 +320,7 @@ class OpenMrsAPI {
             })
         }
 
-        if (data["partner_hivtest_done"]) {
+        if (data["partner_hivtest_done"].length > 0) {
             console.log("----------patner hivtest done------");
             console.log(data["partner_hivtest_done"]);
             if (data["partner_hivtest_done"] == "1") {
@@ -338,7 +338,7 @@ class OpenMrsAPI {
             if (data["partner_hivtest_done"] == "0") {
                 obs.push({
                     "concept": uuids.obs.partner_hivtest_done,
-                    "value": uuids.odkHIVTestDone["2"]
+                    "value": uuids.odkHIVTestDone["0"]
                 })
             }
 
@@ -400,23 +400,31 @@ class OpenMrsAPI {
             })
         }
 
-        if (data["partner_hivtest_done"]) {
-
-            obs.push({
-                "concept": uuids.obs.partner_hivtest_done,
-                "value": uuids.odkHIVTestDone[data["partner_hivtest_done"]]
-            })
-        } else {
-            obs.push({
-                "concept": uuids.obs.partner_hivtest_done,
-                "value": uuids.odkHIVTestDone["66"]
-            })
-        }
+        // if (data["partner_hivtest_done"]) {
+        //     console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+        //     console.log(data["partner_hivtest_done"])
+        //     obs.push({
+        //         "concept": uuids.obs.partner_hivtest_done,
+        //         "value": uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()]
+        //     })
+        // } else {
+        //     obs.push({
+        //         "concept": uuids.obs.partner_hivtest_done,
+        //         "value": uuids.odkHIVTestDone["66"]
+        //     })
+        // }
 
         // if (data["anc_art_initiation"]) {
+        //   if (data["anc_art_initiation"] == 1)
         //   obs.push({
         //       "concept": uuids.obs.anc_art_initiation,
-        //       "value": uuids.odkARTInitiation[data["anc_art_initiation"]]
+        //       "value": uuids.odkARTInitiation["1"]
+        //     })
+        //   }
+        //   else if (data["anc_art_initiation"] == 0) {
+        //   obs.push({
+        //       "concept": uuids.obs.anc_art_initiation,
+        //       "value": uuids.odkARTInitiation["2"]
         //     })
         //   }
         //   else {
@@ -447,29 +455,30 @@ class OpenMrsAPI {
             })
         }
 
-        if (data["art_int_status_refused_reason"] && !data["art_int_refused_reason_missing"]) {
-            console.log("ART initiation reason available")
-            obs.push({
-                "concept": uuids.obs.art_int_refused_reason,
-                "value": uuids.odkARTInitiationStatus[data["art_int_status_refused_reason"]]
-            })
+        if (data["art_int_status_refused_reason"]) {
+          
+          obs.push({
+            "concept": uuids.obs.art_int_refused_reason,
+            "value": data["art_int_status_refused_reason"]
+          })
         }
-
-        if (data["art_int_refused_reason_missing"]) {
-            console.log("ART initiation reason available")
+        
+        if (data["art_int_status_refused_reason_missing"]) {
+            console.log("=================ARM=====================")
+            data["art_int_status_refused_reason_missing"]
+            console.log("ART initiation reason missing available")
             obs.push({
-                "concept": uuids.obs.art_int_refused_reason_missing,
-                "value": data["art_int_refused_reason_missing"]
+                "concept": uuids.obs.art_int_status_refused_reason_missing,
+                "value": data["art_int_status_refused_reason_missing"]
             })
         }
 
         if (data["art_int_status"]) {
             console.log("==============ART initiation Status available=============")
 
-            // console.log(uuids.art_int_status[data["art_int_status"]])
             obs.push({
                 "concept": uuids.obs.art_int_status,
-                "value": uuids.odkARTInitiationStatus[data["art_int_status"]]
+                "value": uuids.odkARTInitiationStatus[data["art_int_status"].toString()]
             })
         } else {
             console.log("==============No ART initiation status =============")
@@ -510,8 +519,8 @@ class OpenMrsAPI {
 
             console.log(uuids.odkHivTestResult[data["hiv_test_result"]])
             obs.push({
-                "concept": uuids.obs.partner_hiv_test_result,
-                "value": uuids.odkHivTestResult[data["hiv_test_result"]]
+                "concept": uuids.obs.hiv_test_result,
+                "value": uuids.odkHivTestResult[data["hiv_test_result"].toString()]
             })
         } else {
             console.log("==============No result=============")
@@ -519,7 +528,7 @@ class OpenMrsAPI {
             console.log(uuids.odkHivTestResult["66"])
 
             obs.push({
-                "concept": uuids.obs.partner_hiv_test_result,
+                "concept": uuids.obs.hiv_test_result,
                 "value": uuids.odkHivTestResult["66"]
             })
         }
@@ -530,7 +539,7 @@ class OpenMrsAPI {
 
             console.log(uuids.odkHIVTestStatus[data["hiv_test_status"]])
             obs.push({
-                "concept": uuids.obs.partner_hiv_test_result,
+                "concept": uuids.obs.hiv_test_status,
                 "value": uuids.odkHIVTestStatus[data["hiv_test_status"]]
             })
         } else {
@@ -539,60 +548,71 @@ class OpenMrsAPI {
             console.log(uuids.odkHIVTestStatus["66"])
 
             obs.push({
-                "concept": uuids.obs.partner_hiv_test_result,
+                "concept": uuids.obs.hiv_test_status,
                 "value": uuids.odkHIVTestStatus["66"]
             })
         }
 
 
-        // if (data["vl_test_done"]) {
-        //   console.log("==============Result Found=============")
+        if (data["vl_test_done"]) {
+          console.log("==============Result Found=============")
 
-        //   console.log(uuids.odkVLTestDone[data["vl_test_done"]])
-        //   obs.push({
-        //     "concept": uuids.obs.vl_test_done,
-        //       "value": uuids.odkVLTestDone[data["vl_test_done"]]
-        //     })
-        //   }  
-        // else {
-        //   console.log("==============No result=============")
+          console.log(uuids.odkVLTestDone[data["vl_test_done"]])
+          obs.push({
+            "concept": uuids.obs.vl_test_done,
+              "value": uuids.odkVLTestDone[data["vl_test_done"].toString()]
+            })
+          }  
+        else {
+          console.log("==============No result=============")
 
-        //   console.log(uuids.odkVLTestDone["66"])
+          console.log(uuids.odkVLTestDone["66"])
 
-        //   obs.push({
-        //     "concept": uuids.obs.vl_test_done,
-        //     "value": uuids.odkVLTestDone["66"]
-        //   })
-        // }
+          obs.push({
+            "concept": uuids.obs.vl_test_done,
+            "value": uuids.odkVLTestDone["66"]
+          })
+        }
 
-        // if (data["vl_test_date"]) {
+        if (data["vl_test_date"]) {
+          obs.push({
+            "concept": uuids.obs.vl_test_date,
+              "value": data["vl_test_date"]
+            })
+        }
+
+        // if (data["vl_test_date_missing"]) {
         //   console.log("VL test Date Missing")
         //   obs.push({
         //     "concept": uuids.obs.vl_test_date,
-        //       "value": data["vl_test_date"]
+        //       "value": data["vl_test_date_missing"]
         //     })
         // }
 
 
-        // if (data["vl_test_result"]) {
-        //   console.log("==============Result Found=============")
+        if (data["vl_test_result"]) {
+          console.log("==============Result Found=============")
+          console.log(uuids.odkVLTestResult[data["vl_test_result"]])
+          if (data["vl_test_result"] == "2"){
+            obs.push({
+                "concept": uuids.obs.vl_test_result,
+                "value": uuids.odkVLTestResult["0"]
+              })
+          }
+          obs.push({
+            "concept": uuids.obs.vl_test_result,
+              "value": uuids.odkVLTestResult[data["vl_test_result"].toString()]
+            })
+          }
+        else {
+          console.log("==============No result=============")
+          console.log(uuids.odkVLTestDone["66"])
 
-        //   console.log(uuids.odkVLTestResult[data["vl_test_result"]])
-        //   obs.push({
-        //     "concept": uuids.obs.vl_test_result,
-        //       "value": uuids.odkVLTestResult[data["vl_test_result"]]
-        //     })
-        //   }
-        // else {
-        //   console.log("==============No result=============")
-
-        //   console.log(uuids.odkVLTestDone["66"])
-
-        //   obs.push({
-        //     "concept": uuids.obs.vl_test_result,
-        //     "value": uuids.odkVLTestResult["66"]
-        //   })
-        // }
+          obs.push({
+            "concept": uuids.obs.vl_test_result,
+            "value": uuids.odkVLTestResult["66"]
+          })
+        }
 
 
         return obs
