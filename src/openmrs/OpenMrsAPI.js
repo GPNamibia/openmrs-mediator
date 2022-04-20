@@ -321,31 +321,30 @@ class OpenMrsAPI {
         }
 
         if (data["partner_hivtest_done"].length > 0) {
-            console.log("----------patner hivtest done------");
-            console.log(data["partner_hivtest_done"]);
-            if (data["partner_hivtest_done"] == "1") {
+          if (data["partner_hivtest_done"] == "1") {
+            obs.push({
+              "concept": uuids.obs.partner_hivtest_done,
+              "value": uuids.odkPartnerHIVTestDone["1"]
+            })
+          }
+          if (data["partner_hivtest_done"] == "2") {
+            obs.push({
+              "concept": uuids.obs.partner_hivtest_done,
+              "value": uuids.odkPartnerHIVTestDone["2"]
+            })
+          }
+          if (data["partner_hivtest_done"] == "0") {
+
                 obs.push({
                     "concept": uuids.obs.partner_hivtest_done,
-                    "value": uuids.odkHIVTestDone["1"]
-                })
-            }
-            if (data["partner_hivtest_done"] == "2") {
-                obs.push({
-                    "concept": uuids.obs.partner_hivtest_done,
-                    "value": uuids.odkHIVTestDone["2"]
-                })
-            }
-            if (data["partner_hivtest_done"] == "0") {
-                obs.push({
-                    "concept": uuids.obs.partner_hivtest_done,
-                    "value": uuids.odkHIVTestDone["0"]
+                    "value": uuids.odkPartnerHIVTestDone["0"]
                 })
             }
 
         } else {
             obs.push({
                 "concept": uuids.obs.partner_hivtest_done,
-                "value": uuids.odkHIVTestDone[data["66"]]
+                "value": uuids.odkPartnerHIVTestDone[data["66"]]
             })
         }
 
