@@ -21,17 +21,15 @@ class OpenMrsAPI {
         })
     }
 
-    postANCData(ancData) {
-        //  console.log(ancData)
+    async postANCData(ancData) {
         console.log(ancData['ptracker_id'])
-
         let patient = this.getPatientUsingId(ancData['ptracker_id'])
 
-        patient.then(res => {
+        patient.then(async(res) => {
             let result = JSON.parse(res.body);
             let patientRecord = result.results
             let currentPatient = null
-            this.getLocation(ancData['facility_name']).then(location => {
+            this.getLocation(ancData['facility_name']).then(async(location) => {
                 let locationUUID = location.body.results[0].uuid
                 if (patientRecord.length > 0) {
                     console.log("**************Patient found********** ")
@@ -39,28 +37,22 @@ class OpenMrsAPI {
                     this.createANCEncounter(currentPatient, ancData, locationUUID).then(ancEncounter => {
                         console.log('***************************** Creating ANC Encounter ***************')
                         console.log(ancEncounter.body)
-                            // console.log(currentPatient)
-                        console.log(ancEncounter.body)
                     }).catch(err => {
                         console.log(err)
                     })
 
                 } else {
                     console.log("**************Creating new Patient************* ")
-                    currentPatient = this.createPatient(ancData, locationUUID);
-                    console.log(currentPatient);
-
-                    this.createANCEncounter(currentPatient, ancData, locationUUID).then(ancEncounter => {
-                        console.log('***************************** Creating ANC Encounter ***************')
-                        console.log(currentPatient)
-                        console.log(ancEncounter.body)
-                        let encounter = ancEncounter.body
-
-                        console.log(encounter)
-
-                    }).catch(err => {
-                        console.log(err)
-                    })
+                    await this.createPatient(ancData, locationUUID).then(async(response)=>{
+                        await this.createANCEncounter(response, ancData, locationUUID).then(ancEncounter => {
+                            console.log('***************************** CREATING ANC ENCOUNTER ***************')
+                            let encounter = ancEncounter.body
+                            console.log(encounter)
+    
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                     })
                 }
             })
 
@@ -68,9 +60,6 @@ class OpenMrsAPI {
     }
 
     createANCEncounter(newPatient, ancData, locationUUID) {
-        console.log("===========================================")
-        console.log(ancData['provider_uuid'])
-
         let obs = this.getObs(ancData)
         console.log("*******************obs*********************")
         console.log(obs)
@@ -88,7 +77,6 @@ class OpenMrsAPI {
             obs
 
         }
-        console.log(body)
         let options = {
             method: 'POST',
             url: privateConfig.openmrsConfig.apiURL + `encounter`,
@@ -119,78 +107,72 @@ class OpenMrsAPI {
         return this.sendRequest(options)
     }
 
-    createPatient(data, locationUUID) {
-        // lastName, givenName, gender, dateOfBirth, address1, cityVillage, country, postalCode
+
+    async createPatient(data, locationUUID) {
+        let personBody;
         let postalCode = ""
-        this.createPerson(data['family'], data['given'], data['sex'], data['dob'], data['address'], data['location'], data['country'], postalCode)
+       await this.createPerson(data['family'], data['given'], data['sex'], data['dob'], data['address'], data['location'], data['country'], postalCode)
             .then((person) => {
                 console.log("***********Created person**************")
-                console.log(person.body)
                 let person_body = person.body
-
-                this.getLocation(data)
-                    .then(location => {
-                        console.log("****************Location created************")
-                        this.generateOpenMRSID()
-                            .then(openMRSIDResult => {
-                                console.log("generating openmrs id")
-                                let openMRSID = openMRSIDResult.body.identifiers[0]
-                                let patientBody = {
-                                    "person": person_body.uuid,
-                                    "identifiers": [{
-                                            "identifier": data['ptracker_id'],
-                                            "identifierType": uuids.identifier_type.ptracker_number,
-                                            "location": locationUUID,
-                                            "preferred": false
-                                        },
-                                        {
-                                            "identifier": openMRSID,
-                                            "identifierType": uuids.identifier_type.openmrs_id,
-                                            "location": locationUUID,
-                                            "preferred": false
-                                        }
-
-                                    ]
-                                }
-                                console.log("*******************patientBody*****************")
-
-                                console.log(patientBody)
-                                console.log('creating patient options')
-                                let options = {
-                                    method: 'POST',
-                                    url: privateConfig.openmrsConfig.apiURL + `patient`,
-                                    qs: {},
-                                    headers: privateConfig.openmrsConfig.headers,
-                                    form: false,
-                                    auth: {
-                                        user: privateConfig.openmrsConfig.username,
-                                        pass: privateConfig.openmrsConfig.password
-                                    },
-                                    json: true,
-                                    body: patientBody
-                                }
-                                console.log("sending post for patient")
-                                this.sendRequest(options).then(patientResult => {
-                                        return patientResult.body
-                                    })
-                                    .catch(patientErr => {
-                                        console.log(patientErr)
-                                    })
-                                console.log(openMRSIDResult.body)
-                            })
-
-                        return true
-                    }).catch(err => {
-                        console.log("error")
-                        console.error(err)
-                    })
-
+                personBody=person_body;
+                return person_body;
             }).catch(err => console.error(err));
+
+           await  this.getLocation(data)
+            .then(location => {
+                console.log("****************Location created************")
+                return location;
+            }).catch(err => {
+                console.log("error")
+                console.error(err)
+            });
+
+           await this.generateOpenMRSID()
+            .then(openMRSIDResult => {
+                console.log("generating openmrs id")
+                let openMRSID = openMRSIDResult.body.identifiers[0]
+                let patientBody = {
+                    "person": personBody.uuid,
+                    "identifiers": [{
+                            "identifier": data['ptracker_id'],
+                            "identifierType": uuids.identifier_type.ptracker_number,
+                            "location": locationUUID,
+                            "preferred": false
+                        },
+                        {
+                            "identifier": openMRSID,
+                            "identifierType": uuids.identifier_type.openmrs_id,
+                            "location": locationUUID,
+                            "preferred": false
+                        }
+
+                    ]
+                }
+                console.log('******************creating patient options****************')
+                let options = {
+                    method: 'POST',
+                    url: privateConfig.openmrsConfig.apiURL + `patient`,
+                    qs: {},
+                    headers: privateConfig.openmrsConfig.headers,
+                    form: false,
+                    auth: {
+                        user: privateConfig.openmrsConfig.username,
+                        pass: privateConfig.openmrsConfig.password
+                    },
+                    json: true,
+                    body: patientBody
+                }
+                console.log("****************sending post for patient********************")
+                return this.sendRequest(options);  
+            }).catch(err => {
+                console.error("error creating patient")
+                console.error(err)
+            });
     }
 
     getLocation(facilityName) {
         console.log("***********getting location**********")
-
 
         let options = {
             method: 'GET',
@@ -260,7 +242,6 @@ class OpenMrsAPI {
                 json: true,
                 body
             }
-            // console.log(options)
         return this.sendRequest(options)
 
     }
@@ -273,9 +254,14 @@ class OpenMrsAPI {
                 "value": data['anc_edd_calculated']
             })
         }
+        else if (data['anc_edd']) {
+          obs.push({
+              "concept": uuids.obs.anc_edd_calculated, // edd obs uuid
+              "value": data['anc_edd']
+          })
+      }
 
         if (data["next_facility_to_visit"]) {
-            console.log("next facility to visit data")
             obs.push({
                 "concept": uuids.obs.next_facility_to_visit,
                 "value": uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]]
@@ -289,18 +275,15 @@ class OpenMrsAPI {
 
 
         if (data["next_facility_to_visit_transfered"]) {
-            console.log("=======================NEXT================")
-            console.log(data["next_facility_to_visit_transfered"])
             obs.push({
-                "concept": uuids.obs.next_facility_to_visit_transfered, // edd obs uuid
-                "value": facilities[data["next_facility_to_visit_transfered"]]
+                "concept": uuids.obs.next_facility_to_visit_transfered,
+                "value": data["next_facility_to_visit_transfered"]
             })
         }
 
 
         if (data["anc_first_hiv_test_status"]) {
           if (data["anc_first_hiv_test_status"] == "1") {
-            console.log(data["anc_first_hiv_test_status"])
               obs.push({
                   "concept": uuids.obs.anc_first_visit,
                   "value": uuids.odkYesNo["1"]
@@ -363,8 +346,6 @@ class OpenMrsAPI {
         }
 
         if (data["next_visit_date"]) {
-            console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-            console.log(data["next_visit_date"])
             obs.push({
                 "concept": uuids.obs.next_visit_date,
                 "value": data["next_visit_date"]
@@ -399,19 +380,6 @@ class OpenMrsAPI {
             })
         }
 
-        // if (data["partner_hivtest_done"]) {
-        //     console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-        //     console.log(data["partner_hivtest_done"])
-        //     obs.push({
-        //         "concept": uuids.obs.partner_hivtest_done,
-        //         "value": uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()]
-        //     })
-        // } else {
-        //     obs.push({
-        //         "concept": uuids.obs.partner_hivtest_done,
-        //         "value": uuids.odkHIVTestDone["66"]
-        //     })
-        // }
 
         // if (data["anc_art_initiation"]) {
         //   if (data["anc_art_initiation"] == 1)
@@ -436,18 +404,11 @@ class OpenMrsAPI {
 
 
         if (data["partner_hiv_test_result"]) {
-            console.log("==============Result Found=============")
-
-            console.log(uuids.odkHivTestResult[data["partner_hiv_test_result"]])
             obs.push({
                 "concept": uuids.obs.partner_hiv_test_result,
                 "value": uuids.odkHivTestResult[data["partner_hiv_test_result"]]
             })
         } else {
-            console.log("==============No result=============")
-
-            console.log(uuids.odkHivTestResult["66"])
-
             obs.push({
                 "concept": uuids.obs.partner_hiv_test_result,
                 "value": uuids.odkHivTestResult["66"]
@@ -463,9 +424,6 @@ class OpenMrsAPI {
         }
         
         if (data["art_int_status_refused_reason_missing"]) {
-            console.log("=================ARM=====================")
-            data["art_int_status_refused_reason_missing"]
-            console.log("ART initiation reason missing available")
             obs.push({
                 "concept": uuids.obs.art_int_status_refused_reason_missing,
                 "value": data["art_int_status_refused_reason_missing"]
@@ -473,15 +431,11 @@ class OpenMrsAPI {
         }
 
         if (data["art_int_status"]) {
-            console.log("==============ART initiation Status available=============")
-
             obs.push({
                 "concept": uuids.obs.art_int_status,
                 "value": uuids.odkARTInitiationStatus[data["art_int_status"].toString()]
             })
         } else {
-            console.log("==============No ART initiation status =============")
-
             obs.push({
                 "concept": uuids.obs.art_int_status,
                 "value": uuids.odkARTInitiationStatus["66"]
@@ -490,15 +444,20 @@ class OpenMrsAPI {
         }
 
         if (data["art_number_missing"]) {
-            console.log("ART Number Missing available")
             obs.push({
                 "concept": uuids.obs.art_number_missing,
-                "value": data["art_number_missing"]
+                "value": 1
             })
         }
 
+        else {
+          obs.push({
+            "concept": uuids.obs.art_number_missing,
+            "value": 0
+        })
+        }
+
         if (data["art_start_date"]) {
-            console.log("ART Start Date")
             obs.push({
                 "concept": uuids.obs.art_start_date,
                 "value": data["art_start_date"]
@@ -506,7 +465,6 @@ class OpenMrsAPI {
         }
 
         if (data["art_start_date_missing"]) {
-            console.log("ART Number Start Date Missing")
             obs.push({
                 "concept": uuids.obs.artStartDateMissing,
                 "value": data["art_start_date_missing"]
@@ -514,17 +472,12 @@ class OpenMrsAPI {
         }
 
         if (data["hiv_test_result"]) {
-            console.log("==============Result Found=============")
-
-            console.log(uuids.odkHivTestResult[data["hiv_test_result"]])
             obs.push({
                 "concept": uuids.obs.hiv_test_result,
                 "value": uuids.odkHivTestResult[data["hiv_test_result"].toString()]
             })
         } else {
-            console.log("==============No result=============")
-
-            console.log(uuids.odkHivTestResult["66"])
+            
 
             obs.push({
                 "concept": uuids.obs.hiv_test_result,
@@ -534,18 +487,11 @@ class OpenMrsAPI {
 
 
         if (data["hiv_test_status"]) {
-            console.log("==============Result Found=============")
-
-            console.log(uuids.odkHIVTestStatus[data["hiv_test_status"]])
             obs.push({
                 "concept": uuids.obs.hiv_test_status,
                 "value": uuids.odkHIVTestStatus[data["hiv_test_status"]]
             })
         } else {
-            console.log("==============No result=============")
-
-            console.log(uuids.odkHIVTestStatus["66"])
-
             obs.push({
                 "concept": uuids.obs.hiv_test_status,
                 "value": uuids.odkHIVTestStatus["66"]
@@ -554,44 +500,19 @@ class OpenMrsAPI {
 
 
         if (data["vl_test_done"]) {
-          console.log("==============Result Found=============")
-
-          console.log(uuids.odkVLTestDone[data["vl_test_done"]])
           obs.push({
             "concept": uuids.obs.vl_test_done,
               "value": uuids.odkVLTestDone[data["vl_test_done"].toString()]
             })
           }  
         else {
-          console.log("==============No result=============")
-
-          console.log(uuids.odkVLTestDone["66"])
-
           obs.push({
             "concept": uuids.obs.vl_test_done,
             "value": uuids.odkVLTestDone["66"]
           })
         }
 
-        if (data["vl_test_date"]) {
-          obs.push({
-            "concept": uuids.obs.vl_test_date,
-              "value": data["vl_test_date"]
-            })
-        }
-
-        // if (data["vl_test_date_missing"]) {
-        //   console.log("VL test Date Missing")
-        //   obs.push({
-        //     "concept": uuids.obs.vl_test_date,
-        //       "value": data["vl_test_date_missing"]
-        //     })
-        // }
-
-
         if (data["vl_test_result"]) {
-          console.log("==============Result Found=============")
-          console.log(uuids.odkVLTestResult[data["vl_test_result"]])
           if (data["vl_test_result"] == "2"){
             obs.push({
                 "concept": uuids.obs.vl_test_result,
@@ -604,9 +525,6 @@ class OpenMrsAPI {
             })
           }
         else {
-          console.log("==============No result=============")
-          console.log(uuids.odkVLTestDone["66"])
-
           obs.push({
             "concept": uuids.obs.vl_test_result,
             "value": uuids.odkVLTestResult["66"]

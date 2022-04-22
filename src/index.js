@@ -20,15 +20,9 @@ app.all('*', async (req, res) => {
 
     // console.log(res);
     for (i=0; i< res.length; i++) {
-      
-      console.log('**********************************************')
-      
-      // console.log(res[i])
-      ancDataResponse = OpenMrsAPIObject.postANCData(res[res.length - 1])
+      console.log('*********************posting ANC encounter *************************')
+      ancDataResponse = OpenMrsAPIObject.postANCData(res[i])
       console.log(ancDataResponse)
-      break
-      
-
     }
   }).catch(error=>{console.error(error)})
 });
@@ -36,8 +30,6 @@ app.all('*', async (req, res) => {
 //Server PORT
 db.sequelize.sync({}).then((req) => {
   app.listen(privateConfig.appConfig.PORT, (err) => {
-      // anc_data = odkCentralStagingData.getSubmissionData(stag_odk_anc)
-      // console.log(anc_data)
       if (err) console.log(`Error: ${err}`)
       console.log(`${privateConfig.appConfig.mediatorName}  listening on port ${privateConfig.appConfig.PORT}...  \n`);
   });

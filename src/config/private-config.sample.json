@@ -5,10 +5,10 @@
   "databaseConfig": {
       "databaseServer": "root",
       "databasePort": 3306,
-      "databaseName": "mysqlrepo",
-      "databaseUsername": "root",
-      "databasePassword": "nBr(}y4fX?&z~Gv~",
-      "tableName": "lab_results"
+      "databaseName": "yourDatabaseName",
+      "databaseUsername": "youruser",
+      "databasePassword": "yourpassword",
+      "tableName": "default_table"
   },
   "openhimConfig": {
       "username": "root@openhim.org",
@@ -16,8 +16,8 @@
       "apiURL": "https://namibia-hie-auth.globalhealthapp.net"
   },
   "openmrsConfig": {
-      "username": "MAono",
-      "password": "Maun2806",
+      "username": "youropenmrsuser",
+      "password": "youropenmrspassword",
       "apiURL": "https://ptracker.globalhealthapp.net/ptracker-test/ws/rest/v1/",
       "headers": {
           "Postman-Token": "",
@@ -27,9 +27,9 @@
       }
   },
   "development": {
-    "username": "root",
-    "password": "nBr(}y4fX?&z~Gv~",
-    "database": "mysqlrepo",
+    "username": "yourDevDbUser",
+    "password": "yourDevDbPassword",
+    "database": "yourdevdatabes",
     "host": "localhost",
     "dialect": "mysql",
     "define": {
