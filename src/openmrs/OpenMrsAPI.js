@@ -467,7 +467,7 @@ class OpenMrsAPI {
         if (data["art_start_date_missing"]) {
             obs.push({
                 "concept": uuids.obs.artStartDateMissing,
-                "value": data["art_start_date_missing"]
+                "value": 1
             })
         }
 
@@ -563,7 +563,7 @@ class OpenMrsAPI {
             }
             return this.sendRequest(options)
         } else {
-            return Promise.reject(`- Cannot create lab encounter without lab result data.\n`)
+            return Promise.reject(`- Cannot create lab encounter without ANC data result data.\n`)
         }
     }
 }

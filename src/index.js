@@ -17,12 +17,24 @@ app.all('*', async (req, res) => {
   odkCentralStagingData.getSubmissionData(stag_odk_anc)
   .then((res)=>{
     
-
+    console.log(res.body)
     // console.log(res);
     for (i=0; i< res.length; i++) {
       console.log('*********************posting ANC encounter *************************')
-      ancDataResponse = OpenMrsAPIObject.postANCData(res[i])
-      console.log(ancDataResponse)
+      OpenMrsAPIObject.postANCData(res[i])
+        .then((ancDataResponse)=>{
+          console.log(ancDataResponse)
+          odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(stag_odk_anc, res[i][id])
+          .then(updateResponse=>{
+            console.log(`ODK staging record id = (${res[i][id]}) openmrs status updated successfully`)
+            console.log(updateResponse)
+          })
+
+
+        })
+        .catch(error=>{
+          console.log(error)
+        })
     }
   }).catch(error=>{console.error(error)})
 });

@@ -1,5 +1,3 @@
-const { OdkCentralStaging } = require("./odkCentralStagingApi");
-const OdkCentral = new OdkCentralStaging();
 const flatten = require('flat');
 const sqlBuilder = require('../db/sqlBuilder');
 
@@ -14,7 +12,19 @@ function getSubmissionData(table_name) {
     });
 }
 
+function updateReviewStateFromOdkCentralAndInsertToMysql(tableName, id) {
+    return new promises((resolve, reject) =>{
+        sqlBuilder.updateReviewState(tableName, id)
+          .then(result => {
+            return resolve(result)
+          })
+          .catch(error => {
+            return reject(`Error while updating record in staging table ${tableName}: ${error}\n`)
+          })
+    })
+}
+
 
 module.exports = {
-    getSubmissionData
+    getSubmissionData, updateReviewStateFromOdkCentralAndInsertToMysql
 };
