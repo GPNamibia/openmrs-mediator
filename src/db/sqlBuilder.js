@@ -1,12 +1,16 @@
 // upsert record into MYSQL
+var Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 async function readData(model) {
 	const foundItems = await model.findAll(
-    { where:{ openmrs_status: null }}
-  )
+    { where:
+     { openmrs_status:null }
+  })
 	return foundItems
     }
 
-async function updateReviewState(model, id) {
+async function updateOpenMRSStatus(model, id) {
   model.update(
     { openmrs_status: '1' },
     { where: { _id: id } }
@@ -20,5 +24,5 @@ async function updateReviewState(model, id) {
 }
 
 module.exports = {
-	readData
+	readData, updateOpenMRSStatus
 }

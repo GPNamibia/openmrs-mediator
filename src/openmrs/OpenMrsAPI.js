@@ -59,6 +59,44 @@ class OpenMrsAPI {
         })
     }
 
+    postDeliveryData(deliveryData){
+      //  console.log(ancData)
+       console.log(deliveryData['ptracker_id'])
+  
+       let patient = this.getPatientUsingId(deliveryData['ptracker_id'])
+  
+       patient.then(res =>{
+         let result =JSON.parse(res.body);
+         let patientRecord = result.results
+         let currentPatient = null
+          this.getLocation(deliveryData['facility_name']).then(location=>{
+            let locationUUID = location.body.results[0].uuid
+            if (patientRecord.length > 0) {
+                    console.log("**************Patient found********** ")
+                    currentPatient = patientRecord[0]
+                    
+                 } else {
+                    console.log("**************Creating new Patient************* ")
+                    currentPatient = this.createPatient(ancData, locationUUID)
+                    console.log(currentPatient)
+                }
+                this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
+                  console.log('***************************** Creating Delivery Encounter ***************')
+                  console.log(currentPatient)
+                  console.log(deliveryEncounter.body)
+                  let encounter = deliveryEncounter.body
+                  
+                  console.log(encounter)
+  
+                  }).catch(err=>{
+                    console.log(err)
+                })
+            
+          })
+       
+       })
+      }
+
     createANCEncounter(newPatient, ancData, locationUUID) {
         let obs = this.getObs(ancData)
         console.log("*******************obs*********************")
@@ -74,6 +112,41 @@ class OpenMrsAPI {
                 encounterRole: uuids.encounters.encounter_role_uuid
             }],
             form: uuids.forms.anc_form,
+            obs
+
+        }
+        let options = {
+            method: 'POST',
+            url: privateConfig.openmrsConfig.apiURL + `encounter`,
+            qs: {},
+            headers: privateConfig.openmrsConfig.headers,
+            form: false,
+            auth: {
+                user: privateConfig.openmrsConfig.username,
+                pass: privateConfig.openmrsConfig.password
+            },
+            json: true,
+            body: body
+        }
+        return this.sendRequest(options)
+    }
+
+
+    createDeliveryEncounter(newPatient, data, locationUUID) {
+        let obs = this.getDeliveryObs(data)
+        console.log("*******************obs*********************")
+        console.log(obs)
+
+        let body = {
+            encounterDatetime: data['visit_date'],
+            patient: newPatient.uuid,
+            encounterType: uuids.encounters.labor_and_delivery,
+            location: locationUUID,
+            encounterProviders: [{
+                provider: uuids.encounters.odk_user_provider_uuid,
+                encounterRole: uuids.encounters.encounter_role_uuid
+            }],
+            form: uuids.forms.labor_and_delivery_form,
             obs
 
         }
@@ -379,7 +452,138 @@ class OpenMrsAPI {
                 "value": true
             })
         }
+        
+        return obs
+    }
 
+
+    getDeliveryObs(data) {
+      let obs = []
+    
+
+      if (data["ld_has_pinkbook"]) {
+        if (data["ld_has_pinkbook"] == "1") {
+            obs.push({
+                "concept": uuids.obs.ld_has_pinkbook,
+                "value": uuids.odkYesNo["1"]
+            })
+        }
+        if (data["ld_has_pinkbook"] == "0") {
+            obs.push({
+                "concept": uuids.obs.ld_has_pinkbook,
+                "value": uuids.odkYesNo["2"]
+        })
+      }
+
+      } else {
+          obs.push({
+              "concept": uuids.obs.ld_has_pinkbook,
+              "value": uuids.odkYesNo[data["66"]]
+          })
+      }
+
+
+
+      if (data["next_facility_to_visit"]) {
+        console.log("next facility to visit data")
+        obs.push({
+            "concept": uuids.obs.next_facility_to_visit,
+            "value": uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]]
+          })
+        }
+      else{
+        obs.push({
+          "concept": uuids.obs.next_facility_to_visit,
+          "value": uuids.odkNextFacilityToVisit["66"]
+        })
+      }
+      
+
+      if (data["next_facility_to_visit_transfered"]){
+        console.log("=======================NEXT================")
+        console.log(data["next_facility_to_visit_transfered"])
+        obs.push({
+          "concept": uuids.obs.next_facility_to_visit_transfered, // edd obs uuid
+          "value": facilities[data["next_facility_to_visit_transfered"]]
+        })
+      } 
+
+      if (data["anc_first_hiv_test_status"]) {
+        obs.push({
+            "concept": uuids.obs.anc_first_hiv_test_status,
+            "value": uuids.odkHIVTestStatus[data["anc_first_hiv_test_status"]]
+        })
+    } else {
+        obs.push({
+            "concept": uuids.obs.anc_first_hiv_test_status,
+            "value": uuids.odkHIVTestStatus["66"]
+        })
+    }
+
+        if (data["anc_gravida"]) {
+          obs.push({
+              "concept": uuids.obs.anc_gravida,
+              "value": data["anc_gravida"]
+            })
+          }
+
+          if (data["anc_lnmp"]) {
+            obs.push({
+                "concept": uuids.obs.anc_lnmp,
+                "value": data["anc_lnmp"]
+              })
+            }
+
+        if (data["next_visit_date"]) {
+          console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+          console.log(data["next_visit_date"])
+          obs.push({
+              "concept": uuids.obs.next_visit_date,
+              "value": data["next_visit_date"]
+            })
+          }
+
+          if (data["next_visit_date_missing"]) {
+            obs.push({
+                "concept": uuids.obs.next_visit_date_missing,
+                "value": true
+              })
+            }
+
+          if (data["anc_para"]) {
+            obs.push({
+                "concept": uuids.obs.anc_para,
+                "value": data["anc_para"]
+              })
+            }
+          
+          if (data["partner_hivtest_date"]) {
+            obs.push({
+                "concept": uuids.obs.partner_hivtest_date,
+                "value": data["partner_hivtest_date"]
+              })
+            }
+
+          if (data["ptrackerpartner_hivtest_date_missing_id"]) {
+            obs.push({
+                "concept": uuids.obs.ptrackerpartner_hivtest_date_missing_id,
+                "value": true
+              })
+            }
+
+          if (data["partner_hivtest_done"]) {
+
+            obs.push({
+                "concept": uuids.obs.partner_hivtest_done,
+                "value": uuids.odkHIVTestDone[data["partner_hivtest_done"]]
+              })
+            }
+            else {
+              obs.push({
+                "concept": uuids.obs.partner_hivtest_done,
+                "value": uuids.odkHIVTestDone["66"]
+              })
+            }
 
         // if (data["anc_art_initiation"]) {
         //   if (data["anc_art_initiation"] == 1)

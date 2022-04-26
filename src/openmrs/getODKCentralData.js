@@ -14,7 +14,7 @@ function getSubmissionData(table_name) {
 
 function updateReviewStateFromOdkCentralAndInsertToMysql(tableName, id) {
     return new promises((resolve, reject) =>{
-        sqlBuilder.updateReviewState(tableName, id)
+        sqlBuilder.updateOpenMRSStatus(tableName, id)
           .then(result => {
             return resolve(result)
           })

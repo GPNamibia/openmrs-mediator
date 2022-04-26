@@ -7,14 +7,14 @@ const sqlBuilder = require('../../db/sqlBuilder')
 async function getAncSubmissionData() {
     return new Promise(async(resolve, reject) => {
         data = await sqlBuilder.getAncSubmissionData(stag_odk_anc)
-        return await odkCentral.updateReviewStateFromOdkCentralAndInsertToMysql(stag_odk_anc, tableColumns, visit_type, table_name)
-            .then(async(result) => {
-                return resolve(result);
-            })
-            .catch(err => {
-                console.error(`Error: ${err} \n`);
-                return reject(err);
-            })
+        // return await odkCentral.updateReviewStateFromOdkCentralAndInsertToMysql(stag_odk_anc, tableColumns, visit_type, table_name)
+        //     .then(async(result) => {
+        //         return resolve(result);
+        //     })
+        //     .catch(err => {
+        //         console.error(`Error: ${err} \n`);
+        //         return reject(err);
+        //     })
     })
 }
 
