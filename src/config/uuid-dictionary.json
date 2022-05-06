@@ -44,7 +44,33 @@
         "vl_test_date":"163281AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "vl_test_result":"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ld_has_pinkbook": "1719AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "anc_first_hiv_test_status":"c5f74c86-62cd-4d22-9260-4238f1e45fe0"
+        "anc_first_hiv_test_status":"c5f74c86-62cd-4d22-9260-4238f1e45fe0",
+        "hiv_retest_status":"948fd6ce-400e-4301-9196-b91fe802cc93",
+        "ld_numberof_infants":"1568AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_status": "159917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_stillbirth": "125872AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_feeding": "1151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_dod": "1543AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_dod_missing": "38b6933e-b6ec-4213-8784-987920f5e49c",
+        "infant_dob": "164802AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_arv_status": "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_arv_reason_for_refusal":"163322AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_arv_reason_for_refusal_missing": "fd85eb5c-a8fc-4fa5-bd2f-5b4dab355978",
+        "infant_ptracker_id": "164803AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_sex": "1587AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ld_motherstatus":"1856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_child_instance": {
+          "1": "8fe7ad7a-494d-4799-bf72-9f58fbdae221",
+          "2": "8fe7ad7a-494d-4799-bf72-9f58fbdae222",
+          "3": "8fe7ad7a-494d-4799-bf72-9f58fbdae223",
+          "4": "8fe7ad7a-494d-4799-bf72-9f58fbdae224",
+          "5": "8fe7ad7a-494d-4799-bf72-9f58fbdae225",
+          "6": "8fe7ad7a-494d-4799-bf72-9f58fbdae226",
+          "7": "8fe7ad7a-494d-4799-bf72-9f58fbdae227",
+          "8": "8fe7ad7a-494d-4799-bf72-9f58fbdae228",
+          "9": "8fe7ad7a-494d-4799-bf72-9f58fbdae229"
+        }
+
     },
     "identifier_type":{
         "ptracker_number": "4da0a3fe-e546-463f-81fa-084f098ff06c",
@@ -105,6 +131,12 @@
       "3": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
       "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     },
+    "odkHIVRetest": {
+      "1": "6f041992-f0fd-4ec7-b7b6-c06b0f60bf3f",
+      "2": "d18fa331-f158-47d0-b344-cf147c7125a4",
+      "3": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
+      "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
     "odkVLTestDone": {
       "1": "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "0": "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -129,5 +161,54 @@
       "1": "164180AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "0": "160530AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkYesNoMissing":{
+      "1": "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkInfantStatus": {
+      "1": "151849AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"154223AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "3":"125872AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+    "odkInfantStillbirth": {
+      "1": "159916AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"135436AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkSex" : {
+      "F": "1534AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "M":"1535AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkInfantFeeding" : {
+      "1": "5526AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"1595AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkInfantArvStatus": {
+      "1": "83a60fef-31c6-4937-907b-42ced15474e3", 
+      "2":"127750AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "3":"1754AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "4":"99b29c50-fc67-11e8-8eb2-f2801f1b9fd1",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkMotherStatus": {
+      "1": "161636AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"134612AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "3":"159492AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "4":"1692AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+    "ancFirstHivTestStatus": {
+      "1": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8", 
+      "2":"703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "3":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "4":"1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",   
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     }
 }

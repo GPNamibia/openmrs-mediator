@@ -16,7 +16,7 @@ app.all('*', async (req, res) => {
   );
   
   pushANC()
-  // pushLabourAndDelivery()
+  pushLabourAndDelivery()
 
   
 });
@@ -56,7 +56,7 @@ function pushLabourAndDelivery() {
 
     for (i=0; i< res.length; i++) {
       console.log('*********************posting Labour and Delivery encounter record *************************')
-      OpenMrsAPIObject.postDeliveryData(res[0])
+      OpenMrsAPIObject.postDeliveryData(res[i])
         .then((lndDataResponse)=>{
           console.log(lndDataResponse)
           odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(delivery, res[i][id])
@@ -68,7 +68,6 @@ function pushLabourAndDelivery() {
         .catch(error=>{
           console.log(error)
         })
-        break
     }
   })
   .catch(error=>{console.error(error)})

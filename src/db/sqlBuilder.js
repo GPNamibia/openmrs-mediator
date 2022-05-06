@@ -23,6 +23,13 @@ async function updateOpenMRSStatus(model, id) {
     )
 }
 
+async function getInfants(model, ptrackerId) {
+  infants = model.findAll(
+    { where: { ptracker_id: ptrackerId } }
+  )
+    return infants
+}
+
 module.exports = {
-	readData, updateOpenMRSStatus
+	readData, updateOpenMRSStatus, getInfants
 }

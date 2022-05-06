@@ -13,7 +13,7 @@ function getSubmissionData(table_name) {
 }
 
 function updateReviewStateFromOdkCentralAndInsertToMysql(tableName, id) {
-    return new promises((resolve, reject) =>{
+    return new Promise((resolve, reject) =>{
         sqlBuilder.updateOpenMRSStatus(tableName, id)
           .then(result => {
             return resolve(result)
@@ -24,7 +24,18 @@ function updateReviewStateFromOdkCentralAndInsertToMysql(tableName, id) {
     })
 }
 
+function getInfants(tableName, ptrackerId) {
+    return new Promise((resolve, reject) =>{
+        sqlBuilder.getInfants(tableName, ptrackerId)
+          .then(result => {
+            return resolve(result)
+          })
+          .catch(error => {
+            return reject(`Error while reading data record from staging table ${tableName}: ${error}\n`)
+          })
+    })
+}
 
 module.exports = {
-    getSubmissionData, updateReviewStateFromOdkCentralAndInsertToMysql
+    getSubmissionData, updateReviewStateFromOdkCentralAndInsertToMysql, getInfants
 };
