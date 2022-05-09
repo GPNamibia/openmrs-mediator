@@ -353,12 +353,12 @@ class OpenMrsAPI {
     }
 
     getObs(data) {
-        let obs = []
-        if (data['anc_edd_calculated']) {
-            obs.push({
-                "concept": uuids.obs.anc_edd_calculated, // edd obs uuid
-                "value": data['anc_edd_calculated']
-            })
+      let obs = []
+      if (data['anc_edd_calculated']) {
+          obs.push({
+              "concept": uuids.obs.anc_edd_calculated, // edd obs uuid
+              "value": data['anc_edd_calculated']
+          })
         }
         else if (data['anc_edd']) {
           obs.push({
@@ -624,14 +624,16 @@ class OpenMrsAPI {
             })
           }
 
-        if (data["ptrackerpartner_hivtest_date_missing_id"]) {
+        
+          if (data["ptrackerpartner_hivtest_date_missing_id"]) {
           obs.push({
               "concept": uuids.obs.ptrackerpartner_hivtest_date_missing_id,
               "value": true
             })
           }
 
-        if (data["partner_hivtest_done"]) {
+        
+          if (data["partner_hivtest_done"]) {
 
           obs.push({
               "concept": uuids.obs.partner_hivtest_done,
@@ -644,32 +646,8 @@ class OpenMrsAPI {
               "value": uuids.odkHIVTestDone["66"]
             })
           }
-
-
-          
-      // if (data["anc_art_initiation"]) {
-      //   if (data["anc_art_initiation"] == 1)
-      //   obs.push({
-      //       "concept": uuids.obs.anc_art_initiation,
-      //       "value": uuids.odkARTInitiation["1"]
-      //     })
-      //   }
-      //   else if (data["anc_art_initiation"] == 0) {
-      //   obs.push({
-      //       "concept": uuids.obs.anc_art_initiation,
-      //       "value": uuids.odkARTInitiation["2"]
-      //     })
-      //   }
-      //   else {
-      //     obs.push({
-      //       "concept": uuids.obs.anc_art_initiation,
-      //       "value": uuids.odkARTInitiation["66"]
-      //     })
-      //   }
-
-
-
-      if (data["partner_hiv_test_result"]) {
+  
+          if (data["partner_hiv_test_result"]) {
           obs.push({
               "concept": uuids.obs.partner_hiv_test_result,
               "value": uuids.odkHivTestResult[data["partner_hiv_test_result"]]
