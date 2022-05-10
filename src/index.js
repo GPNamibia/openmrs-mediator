@@ -33,7 +33,7 @@ function pushANC() {
       OpenMrsAPIObject.postANCData(res[i])
         .then((ancDataResponse)=>{
           console.log(ancDataResponse)
-          odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(stag_odk_anc, res[i][id])
+          odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, res[i][id])
           .then(updateResponse=>{
             console.log(`ODK staging record id = (${res[i][id]}) openmrs status updated successfully`)
             console.log(updateResponse)
@@ -59,7 +59,7 @@ function pushLabourAndDelivery() {
       OpenMrsAPIObject.postDeliveryData(res[i])
         .then((lndDataResponse)=>{
           console.log(lndDataResponse)
-          odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(delivery, res[i][id])
+          odkCentralStagingData.updateOpenmrsStatus(delivery, res[i][id])
           .then(updateResponse=>{
             console.log(`ODK staging Labor and Delivery record id = (${res[i][id]}) openmrs status updated successfully`)
             console.log(updateResponse)

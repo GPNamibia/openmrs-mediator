@@ -12,7 +12,7 @@ function getSubmissionData(table_name) {
     });
 }
 
-function updateReviewStateFromOdkCentralAndInsertToMysql(tableName, id) {
+function updateOpenmrsStatus(tableName, id) {
     return new Promise((resolve, reject) =>{
         sqlBuilder.updateOpenMRSStatus(tableName, id)
           .then(result => {
@@ -37,5 +37,5 @@ function getInfants(tableName, ptrackerId) {
 }
 
 module.exports = {
-    getSubmissionData, updateReviewStateFromOdkCentralAndInsertToMysql, getInfants
+    getSubmissionData, updateOpenmrsStatus, getInfants
 };
