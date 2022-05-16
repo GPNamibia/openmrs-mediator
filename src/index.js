@@ -6,7 +6,9 @@ const PORT = privateConfig.appConfig.PORT
 const odkCentralStagingData = require('./openmrs/getODKCentralData');
 const {OpenMrsAPI} = require('./openmrs/OpenMrsAPI');
 const OpenMrsAPIObject = new OpenMrsAPI();
-const {stag_odk_anc, stag_odk_delivery} = require('../src/models')
+const {PNCInfantAPI} = require('./openmrs/PNCInfant');
+// const PNCInfantAPIObject = new PNCInfantAPI();
+const {stag_odk_anc, stag_odk_delivery, stag_odk_pnc_mother, stag_odk_pnc_infant} = require('../src/models');
 
 app.all('*', async (req, res) => {
   // Starts when a new request is triggered by the polling channel
@@ -17,8 +19,8 @@ app.all('*', async (req, res) => {
   
   pushANC()
   pushLabourAndDelivery()
-
-  
+  pushMotherPNC()
+  pushInfantPNC()
 });
 
 function pushANC() {
@@ -59,9 +61,64 @@ function pushLabourAndDelivery() {
       OpenMrsAPIObject.postDeliveryData(res[i])
         .then((lndDataResponse)=>{
           console.log(lndDataResponse)
-          odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(delivery, res[i][id])
+          odkCentralStagingData.updateReviewStateFromOdkCentralAndInsertToMysql(stag_odk_delivery, res[i][id])
           .then(updateResponse=>{
             console.log(`ODK staging Labor and Delivery record id = (${res[i][id]}) openmrs status updated successfully`)
+            console.log(updateResponse)
+          })
+        })
+        .catch(error=>{
+          console.log(error)
+        })
+    }
+  })
+  .catch(error=>{console.error(error)})
+}
+
+
+function pushMotherPNC() {
+  odkCentralStagingData.getSubmissionData(stag_odk_pnc_mother)
+  .then((res)=>{
+    console.log('*********************posting Mother PNC *************************')
+
+    console.log(res.body)
+
+    for (i=0; i< res.length; i++) {
+      console.log('********************* posting Mother PNC *************************')
+      OpenMrsAPIObject.postMotherPNCData(res[i])
+        .then((motherPNCResponse)=>{
+          console.log(motherPNCResponse)
+          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
+          .then(updateResponse=>{
+            console.log(`ODK staging Mother PNC record id = (${res[i][id]}) openmrs status updated successfully`)
+            console.log(updateResponse)
+          })
+        })
+        .catch(error=>{
+          console.log(error)
+        })
+    }
+  })
+  .catch(error=>{console.error(error)})
+}
+
+
+
+function pushInfantPNC() {
+  odkCentralStagingData.getSubmissionData(stag_odk_pnc_infant)
+  .then((res)=>{
+    console.log('*********************posting Infant PNC *************************')
+
+    console.log(res.body)
+
+    for (i=0; i< res.length; i++) {
+      console.log('********************* posting Infant PNC *************************')
+      OpenMrsAPIObject.postInfantPNCData(res[1])
+        .then((motherPNCResponse)=>{
+          console.log(motherPNCResponse)
+          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
+          .then(updateResponse=>{
+            console.log(`ODK staging Infant PNC record id = (${res[i][id]}) openmrs status updated successfully`)
             console.log(updateResponse)
           })
         })
