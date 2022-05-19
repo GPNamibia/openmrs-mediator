@@ -6,7 +6,11 @@
         "odk_user_provider_uuid": "f5544e8a-d72d-42d4-a0b8-0a45a383dfe1",
         "encounter_role_uuid": "a0b03050-c99b-11e0-9572-0800200c9a66",
         "anc":"2549af50-75c8-4aeb-87ca-4bb2cef6c69a",
-        "labor_and_delivery": "2678423c-0523-4d76-b0da-18177b439eed"
+        "labor_and_delivery": "2678423c-0523-4d76-b0da-18177b439eed",
+        "mother_pnc": "269bcc7f-04f8-4ddc-883d-7a3a0d569aad",
+        "infant_pnc": "af1f1b24-d2e8-4282-b308-0bf79b365584"
+        
+
     },
     "obs": {
         "specimen_id_uuid": "9dacbd90-ea08-11eb-9a03-0242ac130003",
@@ -69,7 +73,36 @@
           "7": "8fe7ad7a-494d-4799-bf72-9f58fbdae227",
           "8": "8fe7ad7a-494d-4799-bf72-9f58fbdae228",
           "9": "8fe7ad7a-494d-4799-bf72-9f58fbdae229"
-        }
+        },
+        "arvAdherence": "1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transfer_status":"160433AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transferin": "160535AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transferin_other": "",
+        "infant_transferin_date": "160534AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transferin_date_missing": "b43fbd27-52d1-4e3f-803b-de26c7fe6413",
+        "infant_transfer_out": "159495AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transfer_out_other": "",
+        "infant_transfer_out_date": "160649AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transfer_out_date_missing": "cd0f6cd4-b976-11e7-abc4-cec278b6b50a",
+
+        "infant_transferto_artclinic": "160535AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transferto_artclinic_missing": "b43fbd27-52d1-4e3f-803b-de26c7fe6413",
+        "infant_transferto_artclinic_date": "160534AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_transferto_artclinic_date_missing": "b43fbd27-52d1-4e3f-803b-de26c7fe6413",
+        "hiv_exposure_status": "6027869c-5d7e-4a82-b22f-6d9c57d61a4d",
+
+        "arv_prophylaxis_status": "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ctx_prophylaxis_status": "f3de6eb3-5d4a-43ca-8648-74649271238c",
+        "ctx_prophylaxis_adherence": "161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_hiv_test_used": "ee8c0292-47f8-4c01-8b60-8ba13a560e1a",
+        "infant_hiv_test_result": "164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_hiv_test_result_pcr": "164461AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "infant_hiv_test_conf": "8c2b3506-5b77-4916-a5c8-677a37a65007",
+        "infant_hiv_test_conf_result":"140497BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "infant_art_linked": "a40d8bc4-56b8-4f28-a1dd-412da5cf20ed",
+        "arv_prophylaxis_adherence": "1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "art_number":"164402AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
 
     },
     "identifier_type":{
@@ -82,9 +115,15 @@
     
     "forms": {
         "anc_form": "12de5bc5-352e-4faf-9961-a2125085a75c",
-        "labor_and_delivery_form":"1e5614d6-5306-11e6-beb8-9e71128cae77"  
+        "labor_and_delivery_form":"1e5614d6-5306-11e6-beb8-9e71128cae77",
+        "mother_pnc_form": "e6b67aa4-6c59-4470-8ad5-b994efeda553",
+        "infant_pnc_form": "5022c5d7-ea45-47ce-bd65-1ba1d8ad2467"
 
     },
+    "relationshipType":{
+      "parentToChild": "8d91a210-c2cc-11de-8d13-0010c6dffd0f"
+      },
+      
 
     "odkNextFacilityToVisit": {
         "1": "163266AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -131,6 +170,11 @@
       "3": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
       "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     },
+    "odkInfantHIVTested": {
+      "1": "6f041992-f0fd-4ec7-b7b6-c06b0f60bf3f",
+      "2": "d18fa331-f158-47d0-b344-cf147c7125a4",
+      "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
     "odkHIVRetest": {
       "1": "6f041992-f0fd-4ec7-b7b6-c06b0f60bf3f",
       "2": "d18fa331-f158-47d0-b344-cf147c7125a4",
@@ -164,7 +208,7 @@
     },
     "odkYesNoMissing":{
       "1": "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
-      "2":"1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "0":"1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
       "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     },
     "odkInfantStatus": {
@@ -210,5 +254,68 @@
       "3":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
       "4":"1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",   
       "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+
+    "odkARVAdherence": {
+      "1": "159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"159406AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "3":"159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "4":"1256AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",   
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkInfantTransferStatus": {
+      "1": "161636AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"160563AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "3":"159492AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "4":"5240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",   
+      "5":"160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "6":"164861AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "arvProphylaxisStatus": {
+      "1": "857c5868-bdcd-4f5c-aadd-8b0fa7de8481", 
+      "2":"e2ae63f3-e4c9-4822-bf18-c894928556c8",  
+      "3":"8eb8dee6-5342-4529-ad2f-4fc5a66becd9",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "ctxProphylaxisStatus": {
+      "1": "f3a26c7d-a612-4b71-bd30-a359cae817bc", 
+      "2":"a1cab110-9652-4891-90e2-c01a5dbca453",  
+      "3":"3cc14c25-3117-4541-8f8e-705943087385",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkHIVTestUsed": {
+      "1": "844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"1042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkRapidTestResult": {
+      "1": "703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    
+    "odkTestResult": {
+      "1": "703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"159971AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "0":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+    "odkInfantARTLinked": {
+      "1": "703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+      "2":"159971AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "0":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+
+    "odkHIVExposureStatus" : {
+      "1": "54431b42-dae4-4d19-9034-44ba7489a334", 
+      "2":"8c64a106-3db1-4a78-af11-df6f5a054945",  
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     }
+
+
+    
 }

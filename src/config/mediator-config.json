@@ -5,7 +5,7 @@
     "description": "This mediator is intended for retrieving submission data from ODK Central Staging Database, and sends to openmrs.",
     "defaultChannelConfig": [
         {
-            "name": "name": "OpenMRS Mediator",
+            "name": "OpenMRS Mediator",
             "urlPattern": "^/ptracker_odk_central_mediator$",
             "routes": [
                 {
