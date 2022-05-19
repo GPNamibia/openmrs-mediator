@@ -1,0 +1,41 @@
+{
+    "urn": "urn:mediator:openmrs",
+    "version": "1.0.0",
+    "name": "ODK Central Staging <=> Open Mediatorr",
+    "description": "This mediator is intended for retrieving submission data from ODK Central Staging Database, and sends to openmrs.",
+    "defaultChannelConfig": [
+        {
+            "name": "OpenMRS Mediator",
+            "urlPattern": "^/ptracker_odk_central_mediator$",
+            "routes": [
+                {
+                    "name": "OpenMRS Mediator Route",
+                    "host": "ptracker_odk_central_mediator",
+                    "path": "/",
+                    "port": "4000",
+                    "primary": true,
+                    "type": "http"
+                }
+            ],
+            "allow": [
+                "admin"
+            ],
+            "methods": [
+                "GET",
+                "PATCH"
+            ],
+            "type": "http"
+        }
+    ],
+    "endpoints": [
+        {
+            "name": "OpenMRS Mediator Endpoint",
+            "host": "ptracker_odk_central_mediator",
+            "path": "/",
+            "port": "4000",
+            "primary": false,
+            "type": "http"
+        }
+    ],
+    "configDefs": []
+}
