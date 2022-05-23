@@ -8,7 +8,11 @@ const {OpenMrsAPI} = require('./openmrs/OpenMrsAPI');
 const OpenMrsAPIObject = new OpenMrsAPI();
 const {PNCInfantAPI} = require('./openmrs/PNCInfant');
 // const PNCInfantAPIObject = new PNCInfantAPI();
+const { getQueryParameters } = require('./openhim/initialize');
 const {stag_odk_anc, stag_odk_delivery, stag_odk_pnc_mother, stag_odk_pnc_infant} = require('../src/models');
+
+//openHIM
+getQueryParameters();
 
 app.all('*', async (req, res) => {
   // Starts when a new request is triggered by the polling channel
