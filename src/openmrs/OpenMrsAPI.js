@@ -605,7 +605,7 @@ class OpenMrsAPI {
         } else {
             obs.push({
                 "concept": uuids.obs.anc_first_visit,
-                "value": uuids.odkYesNo[data["66"]]
+                "value": uuids.odkYesNo["66"]
             })
         }
 
