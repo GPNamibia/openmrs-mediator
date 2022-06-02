@@ -588,14 +588,14 @@ class OpenMrsAPI {
         }
 
 
-        if (data["anc_first_hiv_test_status"]) {
-          if (data["anc_first_hiv_test_status"] == "1") {
+        if (data["anc_first_visit"]) {
+          if (data["anc_first_visit"] == "1") {
               obs.push({
                   "concept": uuids.obs.anc_first_visit,
                   "value": uuids.odkYesNo["1"]
               })
           }
-          if (data["anc_first_hiv_test_status"] == "0") {
+          if (data["anc_first_visit"] == "0") {
               obs.push({
                   "concept": uuids.obs.anc_first_visit,
                   "value": uuids.odkYesNo["2"]
