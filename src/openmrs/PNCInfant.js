@@ -479,28 +479,6 @@ class PNCInfant {
 			  "value": data["next_pnc_visit_facility_transfered"]
 		      })
 		  }
-	  
-	  
-		  if (data["hiv_test_status"]) {
-		    if (data["hiv_test_status"] == "1") {
-			obs.push({
-			    "concept": uuids.obs.anc_first_visit,
-			    "value": uuids.odkHIVTestStatus["1"]
-			})
-		    }
-		    if (data["hiv_test_status"] == "0") {
-			obs.push({
-			    "concept": uuids.obs.anc_first_visit,
-			    "value": uuids.odkHIVTestStatus["2"]
-		    })
-		  }
-	  
-		  } else {
-		      obs.push({
-			  "concept": uuids.obs.anc_first_visit,
-			  "value": uuids.odkHIVTestStatus["66"]
-		      })
-		  }
 		  
 		  if (data["next_pnc_visit_date"]) {
 		      obs.push({
