@@ -38,7 +38,7 @@ class OpenMrsAPI {
                     currentPatient = patientRecord[0]
                     this.createANCEncounter(currentPatient, ancData, locationUUID).then(ancEncounter => {
                         console.log('***************************** Creating ANC Encounter ***************')
-                        console.log(ancEncounter.body)
+                        console.log(`Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`)
                     }).catch(err => {
                         console.log(err)
                     })
@@ -63,10 +63,9 @@ class OpenMrsAPI {
 
     postDeliveryData(deliveryData){
       //  console.log(ancData)
-       console.log(deliveryData['ptracker_id'])
+      console.log(deliveryData['ptracker_id'])
   
-       let patient = this.getPatientUsingId(deliveryData['ptracker_id'])
-  
+      let patient = this.getPatientUsingId(deliveryData['ptracker_id'])
        patient.then(res =>{
          let result =JSON.parse(res.body);
          let patientRecord = result.results
@@ -76,50 +75,89 @@ class OpenMrsAPI {
             if (patientRecord.length > 0) {
                     console.log("**************Patient found********** ")
                     currentPatient = patientRecord[0]
+                    this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
+                  
+                      console.log('***************************** Creating Delivery Encounter ***************')
+                      console.log(currentPatient)
+                      console.log(deliveryEncounter.body)
+                      let encounter = deliveryEncounter.body
+                      this.getInfantObs(deliveryData['ptracker_id'], deliveryData['visit_date'], encounter ).then(infantObs =>{
+                      console.log('***************************** Infant Obs ***************')
+                        for (i=1; i<=infantObs.length;i++){
+                          let body = {
+                                  obsDatetime: deliveryData['visit_date'],
+                                  person: currentPatient.uuid,
+                                  groupMembers: infantObs[i-1],
+                                  encounter: encounter.uuid,
+                                  concept: uuids.obs.infant_child_instance[i.toString()]
+                              }
+                              console.log(body)
+                              let options = {
+                                      method: 'POST',
+                                      url: privateConfig.openmrsConfig.apiURL + `obs`,
+                                      qs: {},
+                                      headers: privateConfig.openmrsConfig.headers,
+                                      form: false,
+                                      auth: {
+                                          user: privateConfig.openmrsConfig.username,
+                                          pass: privateConfig.openmrsConfig.password
+                                      },
+                                      json: true,
+                                      body: body
+                                  }
+    
+                                  this.sendRequest(options)
+                        }
+                      })
+      
+                      }).catch(err=>{
+                        console.log(err)
+                    })
                     
                  } else {
-                    console.log("**************Creating new Patient************* ")
-                    currentPatient = this.createPatient(deliveryData, locationUUID)
-                    console.log(currentPatient)
-                }
-                this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
+                  console.log("**************Creating new Patient************* ")
+                  this.createPatient(deliveryData, locationUUID).then(currentPatient=>{
+                    this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
                   
-                  console.log('***************************** Creating Delivery Encounter ***************')
-                  console.log(currentPatient)
-                  console.log(deliveryEncounter.body)
-                  let encounter = deliveryEncounter.body
-                  this.getInfantObs(deliveryData['ptracker_id'], deliveryData['visit_date'], encounter ).then(infantObs =>{
-                  console.log('***************************** Infant Obs ***************')
-                    for (i=1; i<=infantObs.length;i++){
-                      let body = {
-                              obsDatetime: deliveryData['visit_date'],
-                              person: currentPatient.uuid,
-                              groupMembers: infantObs[i-1],
-                              encounter: encounter.uuid,
-                              concept: uuids.obs.infant_child_instance[i.toString()]
-                          }
-                          console.log(body)
-                          let options = {
-                                  method: 'POST',
-                                  url: privateConfig.openmrsConfig.apiURL + `obs`,
-                                  qs: {},
-                                  headers: privateConfig.openmrsConfig.headers,
-                                  form: false,
-                                  auth: {
-                                      user: privateConfig.openmrsConfig.username,
-                                      pass: privateConfig.openmrsConfig.password
-                                  },
-                                  json: true,
-                                  body: body
+                      console.log('***************************** Creating Delivery Encounter ***************')
+                      console.log(currentPatient)
+                      console.log(deliveryEncounter.body)
+                      let encounter = deliveryEncounter.body
+                      this.getInfantObs(deliveryData['ptracker_id'], deliveryData['visit_date'], encounter ).then(infantObs =>{
+                      console.log('***************************** Infant Obs ***************')
+                        for (i=1; i<=infantObs.length;i++){
+                          let body = {
+                                  obsDatetime: deliveryData['visit_date'],
+                                  person: currentPatient.uuid,
+                                  groupMembers: infantObs[i-1],
+                                  encounter: encounter.uuid,
+                                  concept: uuids.obs.infant_child_instance[i.toString()]
                               }
-
-                              this.sendRequest(options)
-                    }
-                  })
-  
-                  }).catch(err=>{
-                    console.log(err)
-                })
+                              console.log(body)
+                              let options = {
+                                      method: 'POST',
+                                      url: privateConfig.openmrsConfig.apiURL + `obs`,
+                                      qs: {},
+                                      headers: privateConfig.openmrsConfig.headers,
+                                      form: false,
+                                      auth: {
+                                          user: privateConfig.openmrsConfig.username,
+                                          pass: privateConfig.openmrsConfig.password
+                                      },
+                                      json: true,
+                                      body: body
+                                  }
+    
+                                  this.sendRequest(options)
+                        }
+                      })
+      
+                      }).catch(err=>{
+                        console.log(err)
+                    })
+                   })
+                    
+                }
             
           })
        
@@ -1341,13 +1379,13 @@ class OpenMrsAPI {
     if (data["hiv_retest_status"]) {
       obs.push({
           "concept": uuids.obs.hiv_retest_status,
-          "value": uuids.odkHIVTestStatus[data["hiv_retest_status"]]
+          "value": uuids.odkHIVReTestStatus[data["hiv_retest_status"].toString()]
         })
       }
     else{
       obs.push({
-        "concept": uuids.obs.next_facility_to_visit,
-        "value": uuids.odkNextFacilityToVisit["66"]
+        "concept": uuids.obs.hiv_retest_status,
+        "value": uuids.odkHIVReTestStatus["66"]
       })
     }
 
@@ -1378,12 +1416,12 @@ class OpenMrsAPI {
     if (data["anc_first_hiv_test_status"]) {
       obs.push({
           "concept": uuids.obs.anc_first_hiv_test_status,
-          "value": uuids.odkHIVTestStatus[data["anc_first_hiv_test_status"]]
+          "value": uuids.odkANCFirstHIVTestStatus[data["anc_first_hiv_test_status"].toString()]
       })
   } else {
       obs.push({
           "concept": uuids.obs.anc_first_hiv_test_status,
-          "value": uuids.odkHIVTestStatus["66"]
+          "value": uuids.odkANCFirstHIVTestStatus["66"]
       })
   }
 

@@ -49,7 +49,7 @@
         "vl_test_result":"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ld_has_pinkbook": "1719AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "anc_first_hiv_test_status":"c5f74c86-62cd-4d22-9260-4238f1e45fe0",
-        "hiv_retest_status":"948fd6ce-400e-4301-9196-b91fe802cc93",
+        "hiv_retest_status":"159803AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ld_numberof_infants":"1568AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "infant_status": "159917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "infant_stillbirth": "125872AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -168,6 +168,21 @@
       "1": "6f041992-f0fd-4ec7-b7b6-c06b0f60bf3f",
       "2": "d18fa331-f158-47d0-b344-cf147c7125a4",
       "3": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
+      "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkANCFirstHIVTestStatus": {
+      "1": "8b8951a8-e8d6-40ca-ad70-89e8f8f71fa8",
+      "2": "703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "3": "664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "4": "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "5": "1402AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+    },
+    "odkHIVReTestStatus": {
+      "1": "664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "2": "138571AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "3": "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "4": "d18fa331-f158-47d0-b344-cf147c7125a4",
       "66": "54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     },
     "odkInfantHIVTested": {
