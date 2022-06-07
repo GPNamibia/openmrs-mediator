@@ -39,7 +39,7 @@ function pushANC() {
       OpenMrsAPIObject.postANCData(res[i])
         .then((ancDataResponse)=>{
           console.log(ancDataResponse)
-          odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, res[i][id])
+          odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, res[i]['id'])
           .then(updateResponse=>{
             console.log(`ODK staging record id = (${res[i][id]}) openmrs status updated successfully`)
             console.log(updateResponse)
@@ -65,11 +65,14 @@ function pushLabourAndDelivery() {
       OpenMrsAPIObject.postDeliveryData(res[i])
         .then((lndDataResponse)=>{
           console.log(lndDataResponse)
-          odkCentralStagingData.updateOpenmrsStatus(delivery, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Labor and Delivery record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
-          })
+          if (res[i]){
+            
+            odkCentralStagingData.updateOpenmrsStatus(delivery, res[i][id])
+            .then(updateResponse=>{
+              console.log(`ODK staging Labor and Delivery record id = (${res[i]['id']}) openmrs status updated successfully`)
+              console.log(updateResponse)
+            })
+          }
         })
         .catch(error=>{
           console.log(error)
@@ -92,11 +95,14 @@ function pushMotherPNC() {
       OpenMrsAPIObject.postMotherPNCData(res[i])
         .then((motherPNCResponse)=>{
           console.log(motherPNCResponse)
-          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Mother PNC record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
-          })
+          if (res[i]) {
+
+            odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i]['id'])
+            .then(updateResponse=>{
+              console.log(`ODK staging Mother PNC record id = (${res[i]['id']}) openmrs status updated successfully`)
+              console.log(updateResponse)
+            })
+          }
         })
         .catch(error=>{
           console.log(error)
@@ -120,11 +126,13 @@ function pushInfantPNC() {
       OpenMrsAPIObject.postInfantPNCData(res[i])
         .then((motherPNCResponse)=>{
           console.log(motherPNCResponse)
-          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Infant PNC record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
-          })
+          if (res[i]) {
+            odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i]['id'])
+            .then(updateResponse=>{
+              console.log(`ODK staging Infant PNC record id = (${res[i]['id']}) openmrs status updated successfully`)
+              console.log(updateResponse)
+            })
+          }
         })
         .catch(error=>{
           console.log(error)
