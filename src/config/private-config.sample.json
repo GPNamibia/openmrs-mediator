@@ -1,0 +1,58 @@
+{
+  "appConfig": {
+      "PORT": 3000
+  },
+  "databaseConfig": {
+      "databaseServer": "root",
+      "databasePort": 3306,
+      "databaseName": "yourDatabaseName",
+      "databaseUsername": "youruser",
+      "databasePassword": "yourpassword",
+      "tableName": "default_table"
+  },
+  "openhimConfig": {
+      "username": "root@openhim.org",
+      "password": "rehgob-5pExzi-kohpyz",
+      "apiURL": "https://namibia-hie-auth.globalhealthapp.net"
+  },
+  "openmrsConfig": {
+      "username": "youropenmrsuser",
+      "password": "youropenmrspassword",
+      "apiURL": "https://ptracker.globalhealthapp.net/ptracker-test/ws/rest/v1/",
+      "headers": {
+          "Postman-Token": "",
+          "cache-control": "no-cache",
+          "Content-Type": "application/json",
+          "apikey": ""
+      }
+  },
+  "development": {
+    "username": "yourDevDbUser",
+    "password": "yourDevDbPassword",
+    "database": "yourdevdatabes",
+    "host": "localhost",
+    "dialect": "mysql",
+    "define": {
+    "timestamps": true,
+    "freezeTableName": true
+    },
+    "logging": false,
+    "port": 3306
+},
+"test": {
+    "username": "root",
+    "password": "password",
+    "database": "mysqlrepo",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "port": 3306
+},
+"production": {
+    "username": "root",
+    "password": "password",
+    "database": "mysqlrepo",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "port": 3306
+}
+}
