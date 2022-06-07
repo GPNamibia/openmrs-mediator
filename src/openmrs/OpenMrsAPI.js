@@ -1416,12 +1416,12 @@ class OpenMrsAPI {
     if (data["anc_first_hiv_test_status"]) {
       obs.push({
           "concept": uuids.obs.anc_first_hiv_test_status,
-          "value": uuids.odkHIVTestStatus[data["anc_first_hiv_test_status"]]
+          "value": uuids.odkANCFirstHIVTestStatus[data["anc_first_hiv_test_status"].toString()]
       })
   } else {
       obs.push({
           "concept": uuids.obs.anc_first_hiv_test_status,
-          "value": uuids.odkHIVTestStatus["66"]
+          "value": uuids.odkANCFirstHIVTestStatus["66"]
       })
   }
 
