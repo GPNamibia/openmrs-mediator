@@ -49,7 +49,6 @@ class OpenMrsAPI {
                         await this.createANCEncounter(response, ancData, locationUUID).then(ancEncounter => {
                             console.log('***************************** CREATING ANC ENCOUNTER ***************')
                             let encounter = ancEncounter.body
-                            console.log(encounter)
     
                         }).catch(err => {
                             console.log(err)
@@ -62,10 +61,9 @@ class OpenMrsAPI {
     }
 
     postDeliveryData(deliveryData){
-      //  console.log(ancData)
       console.log(deliveryData['ptracker_id'])
-  
-      let patient = this.getPatientUsingId(deliveryData['ptracker_id'])
+      return new Promise((resolve,reject) =>{
+        let patient = this.getPatientUsingId(deliveryData['ptracker_id'])
        patient.then(res =>{
          let result =JSON.parse(res.body);
          let patientRecord = result.results
@@ -75,15 +73,15 @@ class OpenMrsAPI {
             if (patientRecord.length > 0) {
                     console.log("**************Patient found********** ")
                     currentPatient = patientRecord[0]
-                    this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
+                    this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID)
+                      .then(deliveryEncounter => {
                   
                       console.log('***************************** Creating Delivery Encounter ***************')
-                      console.log(currentPatient)
                       console.log(deliveryEncounter.body)
                       let encounter = deliveryEncounter.body
                       this.getInfantObs(deliveryData['ptracker_id'], deliveryData['visit_date'], encounter ).then(infantObs =>{
                       console.log('***************************** Infant Obs ***************')
-                        for (i=1; i<=infantObs.length;i++){
+                        for (let i=1; i<=infantObs.length;i++){
                           let body = {
                                   obsDatetime: deliveryData['visit_date'],
                                   person: currentPatient.uuid,
@@ -91,7 +89,6 @@ class OpenMrsAPI {
                                   encounter: encounter.uuid,
                                   concept: uuids.obs.infant_child_instance[i.toString()]
                               }
-                              console.log(body)
                               let options = {
                                       method: 'POST',
                                       url: privateConfig.openmrsConfig.apiURL + `obs`,
@@ -106,7 +103,7 @@ class OpenMrsAPI {
                                       body: body
                                   }
     
-                                  this.sendRequest(options)
+                                  return resolve(this.sendRequest(options))
                         }
                       })
       
@@ -120,8 +117,6 @@ class OpenMrsAPI {
                     this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID).then(deliveryEncounter =>{
                   
                       console.log('***************************** Creating Delivery Encounter ***************')
-                      console.log(currentPatient)
-                      console.log(deliveryEncounter.body)
                       let encounter = deliveryEncounter.body
                       this.getInfantObs(deliveryData['ptracker_id'], deliveryData['visit_date'], encounter ).then(infantObs =>{
                       console.log('***************************** Infant Obs ***************')
@@ -148,7 +143,7 @@ class OpenMrsAPI {
                                       body: body
                                   }
     
-                                  this.sendRequest(options)
+                                return  resolve(this.sendRequest(options))
                         }
                       })
       
@@ -162,11 +157,15 @@ class OpenMrsAPI {
           })
        
        })
+      })
+      
       }
   
       postMotherPNCData(pncData) {
         console.log(pncData['ptracker_id'])
-        let patient = this.getPatientUsingId(pncData['ptracker_id'])
+
+        return new Promise((resolve, reject) =>{
+          let patient = this.getPatientUsingId(pncData['ptracker_id'])
 
         patient.then(async(res) => {
             let result = JSON.parse(res.body);
@@ -179,7 +178,7 @@ class OpenMrsAPI {
                     currentPatient = patientRecord[0]
                     this.createMotherPNCEncounter(currentPatient, pncData, locationUUID).then(ancEncounter => {
                         console.log('***************************** Creating PNC Encounter ***************')
-                        console.log(ancEncounter.body)
+                        return resolve(ancEncounter)
                     }).catch(err => {
                         console.log(err)
                     })
@@ -190,8 +189,7 @@ class OpenMrsAPI {
                         await this.createMotherPNCEncounter(response, pncData, locationUUID).then(ancEncounter => {
                             console.log('***************************** CREATING ANC ENCOUNTER ***************')
                             let encounter = ancEncounter.body
-                            console.log(encounter)
-    
+                            return resolve(encounter)
                         }).catch(err => {
                             console.log(err)
                         })
@@ -200,68 +198,73 @@ class OpenMrsAPI {
             })
 
         })
+        })
+        
     }
 
     postInfantPNCData(pncData) {
       console.log(pncData['ptracker_id'])
-      let patient = this.getPatientUsingId(pncData['ptracker_id'])
+      return new Promise((resolve, reject)=>{
 
-      patient.then(async(res) => {
-          let result = JSON.parse(res.body);
-          let patientRecord = result.results
-          let currentPatient = null
-          this.getLocation(pncData['facility_name']).then(async(location) => {
-              let locationUUID = location.body.results[0].uuid
-              if (patientRecord.length > 0) {
-                  console.log("**************Patient found********** ")
-                  currentPatient = patientRecord[0]
-                  
-                  this.createInfantPNCEncounter(currentPatient, pncData, locationUUID).then(ancEncounter => {
-                      console.log('***************************** Creating PNC Encounter ***************')
-                      console.log(ancEncounter.body)
-                  }).catch(err => {
-                      console.log(err)
-                  })
-                  if (pncData['parent_ptracker_id']) {
-                    console.log("**********************linking mother to child**********************")
-                   this.createRelationShip(currentPatient, pncData['parent_ptracker_id'])
-                   .then(patientLink =>{
-                    console.log("****************linked mother to child**********************")
-
-                     console.log(patientLink)
-                   }).catch(error =>{
-                     console.error(`Error linking infant to parent: ${error}`)
-                   })
-                 }
-
-              } else {
-                  console.log("**************Creating new Patient************* ")
-                  await this.createPatient(pncData, locationUUID).then(async(response)=>{
-                      await this.createInfantPNCEncounter(response, pncData, locationUUID).then(ancEncounter => {
-                          console.log('***************************** CREATING ANC ENCOUNTER ***************')
-                          let encounter = ancEncounter.body
-                          console.log(encounter)
+        let patient = this.getPatientUsingId(pncData['ptracker_id'])
   
-                      }).catch(err => {
-                          console.log(err)
-                      })
-                   })
-
-                   if (pncData['parent_ptracker_id']) {
-                     console.log("**********************linking mother to child**********************")
-                    this.createRelationShip(currentPatient, pncData['parent_ptracker_id']).then(patientLink =>{
-                     console.log("****************linked mother to child**********************")
-
-                      console.log(patientLink)
-                    }).catch(error =>{
-                      console.error(`Error linking infant to parent: ${error}`)
+        patient.then(async(res) => {
+            let result = JSON.parse(res.body);
+            let patientRecord = result.results
+            let currentPatient = null
+            this.getLocation(pncData['facility_name']).then(async(location) => {
+                let locationUUID = location.body.results[0].uuid
+                if (patientRecord.length > 0) {
+                    console.log("**************Patient found********** ")
+                    currentPatient = patientRecord[0]
+                    
+                    this.createInfantPNCEncounter(currentPatient, pncData, locationUUID).then(ancEncounter => {
+                        console.log('***************************** Creating PNC Encounter ***************')
+                        console.log(ancEncounter.body)
+                    }).catch(err => {
+                        console.log(err)
                     })
-                  }
-              }
-
-              
-          })
-
+                    if (pncData['parent_ptracker_id']) {
+                      console.log("**********************linking mother to child**********************")
+                     this.createRelationShip(currentPatient, pncData['parent_ptracker_id'])
+                     .then(patientLink =>{
+                      console.log("****************linked mother to child**********************")
+  
+                       console.log(patientLink)
+                     }).catch(error =>{
+                       console.error(`Error linking infant to parent: ${error}`)
+                     })
+                   }
+  
+                } else {
+                    console.log("**************Creating new Patient************* ")
+                    await this.createPatient(pncData, locationUUID).then(async(response)=>{
+                        await this.createInfantPNCEncounter(response, pncData, locationUUID).then(ancEncounter => {
+                            console.log('***************************** CREATING ANC ENCOUNTER ***************')
+                            let encounter = ancEncounter.body
+                            console.log(encounter)
+    
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                     })
+  
+                     if (pncData['parent_ptracker_id']) {
+                       console.log("**********************linking mother to child**********************")
+                      this.createRelationShip(currentPatient, pncData['parent_ptracker_id']).then(patientLink =>{
+                       console.log("****************linked mother to child**********************")
+  
+                        console.log(patientLink)
+                      }).catch(error =>{
+                        console.error(`Error linking infant to parent: ${error}`)
+                      })
+                    }
+                }
+  
+                
+            })
+  
+        })
       })
   }
 
@@ -297,8 +300,7 @@ class OpenMrsAPI {
 
     createANCEncounter(newPatient, ancData, locationUUID) {
         let obs = this.getObs(ancData)
-        console.log("*******************obs*********************")
-        console.log(obs)
+        console.log("*******************fetching ANC obs*********************")
 
         let body = {
             encounterDatetime: ancData['visit_date'],
@@ -332,7 +334,6 @@ class OpenMrsAPI {
     createMotherPNCEncounter(newPatient, motherPncData, locationUUID) {
       let obs = this.getMotherPNCObs(motherPncData)
       console.log("*******************obs*********************")
-      console.log(obs)
 
       let body = {
           encounterDatetime: motherPncData['visit_date'],
@@ -366,7 +367,6 @@ class OpenMrsAPI {
   createInfantPNCEncounter(newPatient, infantPncData, locationUUID) {
     let obs = this.getInfantPNCObs(infantPncData)
     console.log("*******************obs*********************")
-    console.log(obs)
 
     let body = {
         encounterDatetime: infantPncData['visit_date'],
@@ -402,7 +402,6 @@ class OpenMrsAPI {
       return new Promise((resolve, reject) => {
         console.log("*******************delivery obs*********************")
         let obs = this.getDeliveryObs(data)
-        console.log(obs)
         let body = {
           encounterDatetime: data['visit_date'],
           patient: newPatient.uuid,
@@ -644,48 +643,6 @@ class OpenMrsAPI {
             obs.push({
                 "concept": uuids.obs.anc_first_visit,
                 "value": uuids.odkYesNo["66"]
-            })
-        }
-
-        if (data["partner_hivtest_done"].length > 0) {
-          if (data["partner_hivtest_done"] == "1") {
-            obs.push({
-              "concept": uuids.obs.partner_hivtest_done,
-              "value": uuids.odkPartnerHIVTestDone["1"]
-            })
-          }
-          if (data["partner_hivtest_done"] == "2") {
-            obs.push({
-              "concept": uuids.obs.partner_hivtest_done,
-              "value": uuids.odkPartnerHIVTestDone["2"]
-            })
-          }
-          if (data["partner_hivtest_done"] == "0") {
-
-                obs.push({
-                    "concept": uuids.obs.partner_hivtest_done,
-                    "value": uuids.odkPartnerHIVTestDone["0"]
-                })
-            }
-
-        } else {
-            obs.push({
-                "concept": uuids.obs.partner_hivtest_done,
-                "value": uuids.odkPartnerHIVTestDone[data["66"]]
-            })
-        }
-
-        if (data["anc_gravida"]) {
-            obs.push({
-                "concept": uuids.obs.anc_gravida,
-                "value": data["anc_gravida"]
-            })
-        }
-
-        if (data["anc_lnmp"]) {
-            obs.push({
-                "concept": uuids.obs.anc_lnmp,
-                "value": data["anc_lnmp"]
             })
         }
 
@@ -1627,8 +1584,8 @@ class OpenMrsAPI {
         odkCentralStagingData.getInfants(stag_odk_delivery_infant, ptrackerID)
       .then(infants =>{
         let observations = []
-
-        for (i = 0; i< infants.length; i++) {
+       
+        for (let i = 0; i< infants.length; i++) {
           let obs = []
           if (infants[i]['infant_status']){
             obs.push({
