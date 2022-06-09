@@ -1,146 +1,221 @@
 const express = require("express");
-const privateConfig = require('./config/private-config.json');
-const db = require('./models');
+const privateConfig = require("./config/private-config.json");
+const db = require("./models");
 const app = express();
-const PORT = privateConfig.appConfig.PORT
-const odkCentralStagingData = require('./openmrs/getODKCentralData');
-const {OpenMrsAPI} = require('./openmrs/OpenMrsAPI');
+const PORT = privateConfig.appConfig.PORT;
+const odkCentralStagingData = require("./openmrs/getODKCentralData");
+const { OpenMrsAPI } = require("./openmrs/OpenMrsAPI");
 const OpenMrsAPIObject = new OpenMrsAPI();
-const {PNCInfantAPI} = require('./openmrs/PNCInfant');
+const { PNCInfantAPI } = require("./openmrs/PNCInfant");
 // const PNCInfantAPIObject = new PNCInfantAPI();
-const { getQueryParameters } = require('./openhim/initialize');
-const {stag_odk_anc, stag_odk_delivery, stag_odk_pnc_mother, stag_odk_pnc_infant} = require('../src/models');
+const { getQueryParameters } = require("./openhim/initialize");
+const {
+  stag_odk_anc,
+  stag_odk_delivery,
+  stag_odk_pnc_mother,
+  stag_odk_pnc_infant,
+} = require("../src/models");
 
 //openHIM
 getQueryParameters();
 
-app.all('*', async (req, res) => {
+app.all("*", async (req, res) => {
   // Starts when a new request is triggered by the polling channel
-  console.log(`\n---------------------------------------------------------------------------------`,
-    `\n${ new Date().toUTCString('en-GB', { timeZone: 'UTC' }) }  - `,
+  console.log(
+    `\n---------------------------------------------------------------------------------`,
+    `\n${new Date().toUTCString("en-GB", { timeZone: "UTC" })}  - `,
     `The ODK Central staging tables <=> ptracker Mediator has received a new request. \n`
   );
-  
-  pushANC()
-  pushLabourAndDelivery()
-  pushMotherPNC()
-  pushInfantPNC()
+
+  // pushANC()
+  // pushLabourAndDelivery()
+  pushMotherPNC();
+  pushInfantPNC();
 });
 
 function pushANC() {
-  odkCentralStagingData.getSubmissionData(stag_odk_anc)
-  .then((res)=>{
-    console.log('*********************posting ANC encounter *************************')
-    
-    console.log(res.body)
-    // console.log(res);
-    for (i=0; i< res.length; i++) {
-      console.log('*********************posting ANC encounter record *************************')
-      OpenMrsAPIObject.postANCData(res[i])
-        .then((ancDataResponse)=>{
-          console.log(ancDataResponse)
-          odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
+  odkCentralStagingData
+    .getSubmissionData(stag_odk_anc)
+    .then((res) => {
+      res.forEach((result) => {
+        if (res.length < 1) {
+          console.log(
+            "************** NO ANC Data found to process ***************"
+          );
+        }
+        console.log(
+          `*********************posting ANC encounter submission UUID = ${result.submission_uuid} *************************`
+        );
+        OpenMrsAPIObject.postANCData(result)
+          .then((ancDataResponse) => {
+            if (result) {
+              console.log(result.submission_uuid);
+              odkCentralStagingData
+                .updateOpenmrsStatus(stag_odk_anc, result.submission_uuid)
+                .then((updateResponse) => {
+                  console.log(
+                    `ODK staging record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully`
+                  );
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
           })
-
-        })
-        .catch(error=>{
-          console.log(error)
-        })
-    }
-  }).catch(error=>{console.error(error)})
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
 function pushLabourAndDelivery() {
-  odkCentralStagingData.getSubmissionData(stag_odk_delivery)
-  .then((res)=>{
-    console.log('*********************posting Labour and Delivery *************************')
+  odkCentralStagingData
+    .getSubmissionData(stag_odk_delivery)
+    .then((res) => {
+      if (res.length < 1) {
+        console.log(
+          "************** NO Labour & Delivery Data found to process ***************"
+        );
+      }
+      res.forEach((result) => {
+        console.log(
+          `*********************posting Labour and Delivery record submission UUID = ${result.submission_uuid}*************************`
+        );
 
-    console.log(res.body)
-
-    for (i=0; i< res.length; i++) {
-      console.log('*********************posting Labour and Delivery encounter record *************************')
-      OpenMrsAPIObject.postDeliveryData(res[i])
-        .then((lndDataResponse)=>{
-          console.log(lndDataResponse)
-          odkCentralStagingData.updateOpenmrsStatus(delivery, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Labor and Delivery record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
+        OpenMrsAPIObject.postDeliveryData(result)
+          .then((lndDataResponse) => {
+            if (result) {
+              console.log(result.submission_uuid);
+              odkCentralStagingData
+                .updateOpenmrsStatus(stag_odk_delivery, result.submission_uuid)
+                .then((updateResponse) => {
+                  console.log(
+                    `ODK staging record for labor and delivery submission UUID = ${result.submission_uuid}) Openmrs status updated successfully`
+                  );
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
           })
-        })
-        .catch(error=>{
-          console.log(error)
-        })
-    }
-  })
-  .catch(error=>{console.error(error)})
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
-
 
 function pushMotherPNC() {
-  odkCentralStagingData.getSubmissionData(stag_odk_pnc_mother)
-  .then((res)=>{
-    console.log('*********************posting Mother PNC *************************')
+  odkCentralStagingData
+    .getSubmissionData(stag_odk_pnc_mother)
+    .then((res) => {
+      if (res.length < 1) {
+        console.log(
+          "************** NO Mother PNC Data found to process ***************"
+        );
+      }
 
-    console.log(res.body)
-
-    for (i=0; i< res.length; i++) {
-      console.log('********************* posting Mother PNC *************************')
-      OpenMrsAPIObject.postMotherPNCData(res[i])
-        .then((motherPNCResponse)=>{
-          console.log(motherPNCResponse)
-          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Mother PNC record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
+      res.forEach((result) => {
+        console.log(
+          `*********************Pushing mother PNC record uuid = ${result.submission_uuid} *************************`
+        );
+        OpenMrsAPIObject.postMotherPNCData(result)
+          .then((motherPNCResponse) => {
+            if (result) {
+              odkCentralStagingData
+                .updateOpenmrsStatus(
+                  stag_odk_pnc_mother,
+                  result.submission_uuid
+                )
+                .then((updateResponse) => {
+                  console.log(
+                    `ODK staging PNC mother record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully`
+                  );
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
           })
-        })
-        .catch(error=>{
-          console.log(error)
-        })
-    }
-  })
-  .catch(error=>{console.error(error)})
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
-
-
 function pushInfantPNC() {
-  odkCentralStagingData.getSubmissionData(stag_odk_pnc_infant)
-  .then((res)=>{
-    console.log('*********************posting Infant PNC *************************')
+  odkCentralStagingData
+    .getSubmissionData(stag_odk_pnc_infant)
+    .then((res) => {
+      if (res.length < 1) {
+        console.log(
+          "************** NO Infant PNC Data found to process ***************"
+        );
+      }
+      res.forEach((result) => {
+        console.log(
+          `*********************posting Infant PNC record uuid = ${result.submission_uuid}*************************`
+        );
 
-    console.log(res.body)
-
-    for (i=0; i< res.length; i++) {
-      console.log('********************* posting Infant PNC *************************')
-      OpenMrsAPIObject.postInfantPNCData(res[i])
-        .then((motherPNCResponse)=>{
-          console.log(motherPNCResponse)
-          odkCentralStagingData.updateOpenMRsStatus(stag_odk_pnc_mother, res[i][id])
-          .then(updateResponse=>{
-            console.log(`ODK staging Infant PNC record id = (${res[i][id]}) openmrs status updated successfully`)
-            console.log(updateResponse)
+        OpenMrsAPIObject.postInfantPNCData(result)
+          .then((infantPNCResponse) => {
+            if (result) {
+              console.log("Updating database records");
+              odkCentralStagingData
+                .updateOpenmrsStatus(
+                  stag_odk_pnc_infant,
+                  result.submission_uuid
+                )
+                .then((updateResponse) => {
+                  console.log(
+                    `ODK staging PNC Infant record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully`
+                  );
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
           })
-        })
-        .catch(error=>{
-          console.log(error)
-        })
-    }
-  })
-  .catch(error=>{console.error(error)})
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
 //Server PORT
-db.sequelize.sync({}).then((req) => {
-  app.listen(privateConfig.appConfig.PORT, (err) => {
-      if (err) console.log(`Error: ${err}`)
-      console.log(`${privateConfig.appConfig.mediatorName}  listening on port ${privateConfig.appConfig.PORT}...  \n`);
+db.sequelize
+  .sync({})
+  .then((req) => {
+    app.listen(privateConfig.appConfig.PORT, (err) => {
+      if (err) console.log(`Error: ${err}`);
+      console.log(
+        `${privateConfig.appConfig.mediatorName}  listening on port ${privateConfig.appConfig.PORT}...  \n`
+      );
+    });
+  })
+  .then(() => {
+    console.log(
+      `Succesfully connected to '${privateConfig.development.database}' database...  \n`
+    );
+  })
+  .catch((err) => {
+    console.log(
+      `Error when connecting to '${privateConfig.development.database}' database...:: \n`,
+      err
+    );
   });
-}).then(() => {
-  console.log(`Succesfully connected to '${privateConfig.development.database}' database...  \n`)
-
-}).catch(err => { console.log(`Error when connecting to '${privateConfig.development.database}' database...:: \n`, err) })

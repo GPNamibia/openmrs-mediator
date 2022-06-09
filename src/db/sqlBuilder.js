@@ -5,24 +5,22 @@ const Op = Sequelize.Op;
 async function readData(model) {
 	const foundItems = await model.findAll(
     { where:
-     { openmrs_status:null }
+     { 
+       openmrs_status: { 
+         [Op.or]: { 
+           [Op.not]: '1',
+            [Op.eq]: null, }, },}
   })
 	return foundItems
     }
 
-async function updateOpenMRSStatus(model, id) {
-  model.update(
-    { openmrs_status: '1' },
-    { where: { _id: id } }
-  )
-    .success(result =>
-      handleResult(result)
-    )
-    .error(err =>
-      handleError(err)
-    )
+async function updateOpenMRSStatus(model, submission_uuid) {
+  const foundItem = await model.findOne({ where: { submission_uuid: submission_uuid } })
+    if (foundItem) {
+        const item = await model.update({ openmrs_status: 1 }, { where: { submission_uuid: submission_uuid } })
+        return { item, created: false }
+    }
 }
-
 async function getInfants(model, ptrackerId) {
   infants = model.findAll(
     { where: { ptracker_id: ptrackerId } }
