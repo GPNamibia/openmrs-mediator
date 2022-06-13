@@ -23,9 +23,6 @@ app.all('*', async (req, res) => {
         console.error(`Error sending data to PTracker: ${error}`)
     }
   }) 
-  // pushLabourAndDelivery()
-  // pushMotherPNC()
-  // pushInfantPNC()
 });
 
 

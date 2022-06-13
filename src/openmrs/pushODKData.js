@@ -1,8 +1,6 @@
 const odkCentralStagingData = require('./getODKCentralData');
 const {OpenMrsAPI} = require('./OpenMrsAPI');
 const OpenMrsAPIObject = new OpenMrsAPI();
-// const {PNCInfantAPI} = require('./openmrs/PNCInfant');
-// const PNCInfantAPIObject = new PNCInfantAPI();
 const {stag_odk_anc, stag_odk_delivery, stag_odk_pnc_mother, stag_odk_pnc_infant} = require('../../src/models');
 const { resolve } = require('path');
 
