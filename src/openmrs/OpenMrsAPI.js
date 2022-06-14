@@ -25,7 +25,6 @@ class OpenMrsAPI {
   }
 
   async postANCData(ancData) {
-    console.log(ancData["ptracker_id"]);
     let patient = this.getPatientUsingId(ancData["ptracker_id"]);
 
     patient.then(async (res) => {
@@ -71,7 +70,6 @@ class OpenMrsAPI {
   }
 
   postDeliveryData(deliveryData) {
-    console.log(deliveryData["ptracker_id"]);
     return new Promise((resolve, reject) => {
       let patient = this.getPatientUsingId(deliveryData["ptracker_id"]);
       patient.then((res) => {
@@ -92,7 +90,6 @@ class OpenMrsAPI {
                 console.log(
                   "***************************** Creating Delivery Encounter ***************"
                 );
-                console.log(deliveryEncounter.body);
                 let encounter = deliveryEncounter.body;
                 this.getInfantObs(
                   deliveryData["ptracker_id"],
@@ -162,7 +159,6 @@ class OpenMrsAPI {
                           concept:
                             uuids.obs.infant_child_instance[i.toString()],
                         };
-                        console.log(body);
                         let options = {
                           method: "POST",
                           url: privateConfig.openmrsConfig.apiURL + `obs`,
@@ -193,7 +189,6 @@ class OpenMrsAPI {
   }
 
   postMotherPNCData(pncData) {
-    console.log(pncData["ptracker_id"]);
 
     return new Promise((resolve, reject) => {
       let patient = this.getPatientUsingId(pncData["ptracker_id"]);
@@ -272,8 +267,6 @@ class OpenMrsAPI {
                   console.log(
                     "****************linked mother to child**********************"
                   );
-
-                  console.log(patientLink);
                 })
                 .catch((error) => {
                   console.error(`Error linking infant to parent: ${error}`);
@@ -307,7 +300,6 @@ class OpenMrsAPI {
                       console.log(
                         "****************linked mother to child**********************"
                       );
-                      console.log(patientLink);
                     })
                     .catch((error) => {
                       console.error(`Error linking infant to parent: ${error}`);
@@ -345,7 +337,6 @@ class OpenMrsAPI {
           personA: results[0].uuid,
           personB: currentPatient.uuid,
         };
-        console.log(body);
         let options = {
           method: "POST",
           url: privateConfig.openmrsConfig.apiURL + `relationship`,
@@ -1612,7 +1603,6 @@ class OpenMrsAPI {
   }
 
   getInfantObs(ptrackerID, obsDatetime, encounter) {
-    console.log(ptrackerID);
     return new Promise((resolve, reject) => {
       odkCentralStagingData
         .getInfants(stag_odk_delivery_infant, ptrackerID)
