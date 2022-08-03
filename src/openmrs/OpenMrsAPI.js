@@ -3,12 +3,12 @@ const privateConfig = require("../config/private-config.json");
 const uuids = require("../config/uuid-dictionary.json");
 const facilities = require("../config/mflCodes.json");
 const odkCentralStagingData = require("./getODKCentralData");
-const { stag_odk_delivery_infant } = require("../../src/models");
+const { stag_odk_anc, stag_odk_delivery, stag_odk_pnc_mother, stag_odk_pnc_infant, stag_odk_delivery_infant } = require("../../src/models");
 
 const config = privateConfig.odkCentralConfig;
 
 class OpenMrsAPI {
-  constructor() {}
+  constructor() { }
   sendRequest(options) {
     return new Promise((resolve, reject) => {
       request(options, function (err, response, body) {
@@ -44,23 +44,63 @@ class OpenMrsAPI {
               console.log(
                 `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
               );
+              //update openmrs status
+              odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid,`sent`)
+                .then((updateResponse) => {
+                  console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
             })
             .catch((err) => {
-              console.log(err);
+              console.log(`Error creating encounter for patient uuid = ${ancEncounter.body.patient.uuid},${err}`);
+              //update openmrs status
+              odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid`pending`)
+                .then((updateResponse) => {
+                  console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                  //update openmrs error table
+                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
             });
         } else {
           console.log("**************Creating new Patient************* ");
           let newPatient = await this.createPatient(ancData, locationUUID);
           let patientBody = newPatient.body;
           console.log(`Patient UUID ${patientBody.uuid}`);
-          let encounter = await this.createANCEncounter(
-            patientBody,
-            ancData,
-            locationUUID
-          );
-          console.log(
-            `Encounter successfully created for patient uuid = ${encounter.body.patient.uuid}`
-          );
+          this.createANCEncounter(patientBody, ancData, locationUUID)
+          .then((ancEncounter) => {
+            console.log(
+              "***************************** Creating ANC Encounter ***************"
+            );
+            console.log(
+              `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
+            );
+            //update openmrs status
+            odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid,`sent`)
+              .then((updateResponse) => {
+                console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((err) => {
+            // console.log(`Error creating encounter for patient uuid = ${ancEncounter.body.patient.uuid},${err}`);
+            //update openmrs status
+            odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid,`pending`)
+              .then((updateResponse) => {
+                console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                //update openmrs error table
+                odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          });
         }
       });
     });
@@ -261,11 +301,27 @@ class OpenMrsAPI {
                 console.log(
                   "***************************** Creating PNC Encounter ***************"
                 );
-
+                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid`pending`)
+                .then((updateResponse) => {
+                  console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                  //update openmrs error table
+                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,pncData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
                 return resolve(ancEncounter);
               })
               .catch((err) => {
-                console.log(err);
+                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid`pending`)
+                .then((updateResponse) => {
+                  console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                  //update openmrs error table
+                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,pncData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
               });
           } else {
             console.log("**************Creating new Patient************* ");
@@ -344,7 +400,9 @@ class OpenMrsAPI {
   }
 
   createANCEncounter(newPatient, ancData, locationUUID) {
+    console.log("*******************PRINTING ANC obs*********************");
     let obs = this.getObs(ancData);
+    console.log(obs);
     console.log("*******************fetching ANC obs*********************");
 
     let body = {
@@ -644,95 +702,174 @@ class OpenMrsAPI {
   }
 
   getObs(data) {
-    let obs = [];
-    if (data["anc_edd_calculated"]) {
-      obs.push({
-        concept: uuids.obs.anc_edd_calculated, // edd obs uuid
-        value: data["anc_edd_calculated"],
-      });
-    } else if (data["anc_edd"]) {
-      obs.push({
-        concept: uuids.obs.anc_edd_calculated, // edd obs uuid
-        value: data["anc_edd"],
-      });
-    }
-
-    if (data["next_facility_to_visit"]) {
-      obs.push({
-        concept: uuids.obs.next_facility_to_visit,
-        value: uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]],
-      });
-    } else {
-      obs.push({
-        concept: uuids.obs.next_facility_to_visit,
-        value: uuids.odkNextFacilityToVisit["66"],
-      });
-    }
-
-    if (data["next_facility_to_visit_transfered"]) {
-      obs.push({
-        concept: uuids.obs.next_facility_to_visit_transfered,
-        value: data["next_facility_to_visit_transfered"],
-      });
-    }
-
-    if (data["anc_first_visit"]) {
-      if (data["anc_first_visit"] == "1") {
+    if (data) {
+      let obs = [];
+      if (data["anc_edd_calculated"]) {
         obs.push({
-          concept: uuids.obs.anc_first_visit,
-          value: uuids.odkYesNo["1"],
+          concept: uuids.obs.anc_edd_calculated, // edd obs uuid
+          value: data["anc_edd_calculated"],
+        });
+      } else if (data["anc_edd"]) {
+        obs.push({
+          concept: uuids.obs.anc_edd_calculated, // edd obs uuid
+          value: data["anc_edd"],
+        });
+      } else {
+        console.log("Missing anc_edd_calculated!");
+      }
+
+      if (data["next_facility_to_visit"]) {
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit,
+          value: uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]],
+        });
+      } else {
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit,
+          value: uuids.odkNextFacilityToVisit["66"],
         });
       }
-      if (data["anc_first_visit"] == "0") {
+
+      if (data["next_facility_to_visit_transfered"]) {
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit_transfered,
+          value: data["next_facility_to_visit_transfered"],
+        });
+      } else {
+        console.log("Missing next_facility_to_visit_transfered!");
+      }
+
+      if (data["anc_first_visit"]) {
+        if (data["anc_first_visit"] == "1") {
+          obs.push({
+            concept: uuids.obs.anc_first_visit,
+            value: uuids.odkYesNo["1"],
+          });
+        }
+        if (data["anc_first_visit"] == "0") {
+          obs.push({
+            concept: uuids.obs.anc_first_visit,
+            value: uuids.odkYesNo["2"],
+          });
+        }
+      } else {
         obs.push({
           concept: uuids.obs.anc_first_visit,
-          value: uuids.odkYesNo["2"],
+          value: uuids.odkYesNo["66"],
         });
       }
+
+      if (data["next_visit_date"]) {
+        obs.push({
+          concept: uuids.obs.next_visit_date,
+          value: data["next_visit_date"],
+        });
+      } else {
+        console.log("Missing next_visit_date!");
+      }
+
+      if (data["next_visit_date_missing"]) {
+        obs.push({
+          concept: uuids.obs.next_visit_date_missing,
+          value: true,
+        });
+      } else {
+        console.log("Missing next_visit_date_missing!");
+      }
+
+      if (data["anc_para"]) {
+        obs.push({
+          concept: uuids.obs.anc_para,
+          value: data["anc_para"],
+        });
+      } else {
+        console.log("Missing anc_para!");
+      }
+
+      if (data["partner_hivtest_date"]) {
+        obs.push({
+          concept: uuids.obs.partner_hivtest_date,
+          value: data["partner_hivtest_date"],
+        });
+      } else {
+        console.log("Missing partner_hivtest_date!");
+      }
+
+      if (data["ptrackerpartner_hivtest_date_missing_id"]) {
+        obs.push({
+          concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
+          value: true,
+        });
+      } else {
+        console.log("Missing ptrackerpartner_hivtest_date_missing_id!");
+      }
+      //art initiation
+      if (data["art_int_status_refused_reason"]) {
+        obs.push({
+          concept: uuids.obs.art_int_refused_reason,
+          value: data["art_int_status_refused_reason"],
+        });
+      }else {
+          console.log("Missing art_int_status_refused_reason!");
+        }
+  
+      if (data["art_int_status_refused_reason_missing"]) {
+        obs.push({
+          concept: uuids.obs.art_int_status_refused_reason_missing,
+          value: data["art_int_status_refused_reason_missing"],
+        });
+      }else {
+        console.log("Missing art_int_status_refused_reason_missing!");
+      }
+  
+      if (data["art_int_status"]) {
+        obs.push({
+          concept: uuids.obs.art_int_status,
+          value: uuids.odkARTInitiationStatus[data["art_int_status"].toString()],
+        });
+      } else {
+        obs.push({
+          concept: uuids.obs.art_int_status,
+          value: uuids.odkARTInitiationStatus["66"],
+        });
+      }
+  
+      if (data["art_number_missing"]) {
+        obs.push({
+          concept: uuids.obs.art_number_missing,
+          value: 1,
+        });
+      } else {
+        obs.push({
+          concept: uuids.obs.art_number_missing,
+          value: 0,
+        });
+      }
+  
+      if (data["art_start_date"]) {
+        obs.push({
+          concept: uuids.obs.art_start_date,
+          value: data["art_start_date"],
+        });
+      }else {
+        console.log("Missing art_start_date!");
+      }
+  
+      if (data["art_start_date_missing"]) {
+        obs.push({
+          concept: uuids.obs.artStartDateMissing,
+          value: 1,
+        });
+      }else {
+        console.log("Missing art_start_date_missing!");
+      }
+
+      return obs;
     } else {
-      obs.push({
-        concept: uuids.obs.anc_first_visit,
-        value: uuids.odkYesNo["66"],
-      });
+      return [];
     }
-
-    if (data["next_visit_date"]) {
-      obs.push({
-        concept: uuids.obs.next_visit_date,
-        value: data["next_visit_date"],
-      });
-    }
-
-    if (data["next_visit_date_missing"]) {
-      obs.push({
-        concept: uuids.obs.next_visit_date_missing,
-        value: true,
-      });
-    }
-
-    if (data["anc_para"]) {
-      obs.push({
-        concept: uuids.obs.anc_para,
-        value: data["anc_para"],
-      });
-    }
-
-    if (data["partner_hivtest_date"]) {
-      obs.push({
-        concept: uuids.obs.partner_hivtest_date,
-        value: data["partner_hivtest_date"],
-      });
-    }
-
-    if (data["ptrackerpartner_hivtest_date_missing_id"]) {
-      obs.push({
-        concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
-        value: true,
-      });
-    }
-
-    return obs;
   }
+
 
   getMotherPNCObs(data) {
     let obs = [];
@@ -748,14 +885,12 @@ class OpenMrsAPI {
         value: uuids.odkNextFacilityToVisit["66"],
       });
     }
-
     if (data["next_pnc_visit_facility_transfered"]) {
       obs.push({
         concept: uuids.obs.next_facility_to_visit_transfered,
         value: data["next_pnc_visit_facility_transfered"],
       });
     }
-
     if (data["hiv_test_status"]) {
       if (data["hiv_test_status"] == "1") {
         obs.push({
@@ -1185,19 +1320,22 @@ class OpenMrsAPI {
         value: true,
       });
     }
-
     if (data["art_int_status_refused_reason"]) {
       obs.push({
         concept: uuids.obs.art_int_refused_reason,
         value: data["art_int_status_refused_reason"],
       });
-    }
+    }else {
+        console.log("Missing art_int_status_refused_reason!");
+      }
 
     if (data["art_int_status_refused_reason_missing"]) {
       obs.push({
         concept: uuids.obs.art_int_status_refused_reason_missing,
         value: data["art_int_status_refused_reason_missing"],
       });
+    }else {
+      console.log("Missing art_int_status_refused_reason_missing!");
     }
 
     if (data["art_int_status"]) {
@@ -1229,6 +1367,8 @@ class OpenMrsAPI {
         concept: uuids.obs.art_start_date,
         value: data["art_start_date"],
       });
+    }else {
+      console.log("Missing art_start_date!");
     }
 
     if (data["art_start_date_missing"]) {
@@ -1236,6 +1376,8 @@ class OpenMrsAPI {
         concept: uuids.obs.artStartDateMissing,
         value: 1,
       });
+    }else {
+      console.log("Missing art_start_date_missing!");
     }
 
     if (data["hiv_test_result"]) {
@@ -1365,7 +1507,7 @@ class OpenMrsAPI {
         concept: uuids.obs.anc_first_hiv_test_status,
         value:
           uuids.odkANCFirstHIVTestStatus[
-            data["anc_first_hiv_test_status"].toString()
+          data["anc_first_hiv_test_status"].toString()
           ],
       });
     } else {

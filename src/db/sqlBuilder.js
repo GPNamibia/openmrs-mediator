@@ -8,19 +8,28 @@ async function readData(model) {
      { 
        openmrs_status: { 
          [Op.or]: { 
-           [Op.not]: '1',
+           [Op.not]: 'sent',
             [Op.eq]: null, }, },}
   })
 	return foundItems
     }
 
-async function updateOpenMRSStatus(model, submission_uuid) {
+async function updateOpenMRSStatus(model, submission_uuid,message) {
   const foundItem = await model.findOne({ where: { submission_uuid: submission_uuid } })
     if (foundItem) {
-        const item = await model.update({ openmrs_status: 1 }, { where: { submission_uuid: submission_uuid } })
+        const item = await model.update({ openmrs_status: message }, { where: { submission_uuid: submission_uuid } })
         return { item, created: false }
     }
 }
+
+async function updateOpenmrsErrorMessage(model, submission_uuid,error) {
+  const foundItem = await model.findOne({ where: { submission_uuid: submission_uuid } })
+    if (foundItem) {
+        const item = await model.update({ openmrs_error_message: error }, { where: { submission_uuid: submission_uuid } })
+        return { item, created: false }
+    }
+}
+
 async function getInfants(model, ptrackerId) {
   infants = model.findAll(
     { where: { ptracker_id: ptrackerId } }
@@ -29,5 +38,5 @@ async function getInfants(model, ptrackerId) {
 }
 
 module.exports = {
-	readData, updateOpenMRSStatus, getInfants
+	readData, updateOpenMRSStatus, getInfants,updateOpenmrsErrorMessage
 }

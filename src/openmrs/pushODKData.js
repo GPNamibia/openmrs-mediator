@@ -38,16 +38,6 @@ async function pushANC() {
             .then((ancDataResponse) => {
               if (result) {
                 console.log(result.submission_uuid);
-                odkCentralStagingData
-                  .updateOpenmrsStatus(stag_odk_anc, result.submission_uuid)
-                  .then((updateResponse) => {
-                    console.log(
-                      `ODK staging record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully  ✅`
-                    );
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
               }
             })
             .catch((error) => {
