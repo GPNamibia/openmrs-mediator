@@ -54,13 +54,13 @@ class OpenMrsAPI {
                 });
             })
             .catch((err) => {
-              console.log(`Error creating encounter for patient uuid = ${ancEncounter.body.patient.uuid},${err}`);
+              //console.log(`Error creating encounter for patient uuid = ${ancEncounter.body.patient.uuid},${err}`);
               //update openmrs status
-              odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid`pending`)
+              odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, ancData.submission_uuid,`pending`)
                 .then((updateResponse) => {
                   console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
                   //update openmrs error table
-                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancData.submission_uuid},${err}`);
                 })
                 .catch((error) => {
                   console.log(error);
@@ -95,7 +95,7 @@ class OpenMrsAPI {
               .then((updateResponse) => {
                 console.log(`ODK staging record submission_uuid = ${ancData.submission_uuid}) Openmrs status updated successfully  ✅`);
                 //update openmrs error table
-                odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,ancData.submission_uuid,`Error creating encounter for ${ancData.submission_uuid},${err}`);
               })
               .catch((error) => {
                 console.log(error);
@@ -301,7 +301,7 @@ class OpenMrsAPI {
                 console.log(
                   "***************************** Creating PNC Encounter ***************"
                 );
-                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid`pending`)
+                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid,`pending`)
                 .then((updateResponse) => {
                   console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
                   //update openmrs error table
@@ -313,11 +313,11 @@ class OpenMrsAPI {
                 return resolve(ancEncounter);
               })
               .catch((err) => {
-                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid`pending`)
+                odkCentralStagingData.updateOpenmrsStatus(stag_odk_anc, pncData.submission_uuid,`pending`)
                 .then((updateResponse) => {
                   console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
                   //update openmrs error table
-                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,pncData.submission_uuid,`Error creating encounter for ${ancEncounter.body.patient.uuid},${err}`);
+                  odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_anc,pncData.submission_uuid,`Error creating encounter for ${pncData.submission_uuid},${err}`);
                 })
                 .catch((error) => {
                   console.log(error);
