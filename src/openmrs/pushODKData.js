@@ -67,22 +67,24 @@ async function pushLabourAndDelivery() {
         );
 
         //Infant data
-        odkCentralStagingData.getInfants(stag_odk_delivery_infant,result.ptracker_id).then((res) => {
-          return new Promise((resolve, reject) => {
-            res.forEach(response => {
-              OpenMrsAPIObject.postDeliveryData(result,response)
-              .then((lndDataResponse) => {
-                if (result) {
-                  console.log('Updating L & D records')
-                  console.log(result.submission_uuid);
-                }
-              })
-              .catch((error) => {
-                console.log(error);
+        odkCentralStagingData
+          .getInfants(stag_odk_delivery_infant, result.ptracker_id)
+          .then((res) => {
+            return new Promise((resolve, reject) => {
+              res.forEach((response) => {
+                OpenMrsAPIObject.postDeliveryData(result, response)
+                  .then((lndDataResponse) => {
+                    if (result) {
+                      console.log("Updating L & D records");
+                      console.log(result.submission_uuid);
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
               });
             });
-          })
-        })
+          });
       });
       return resolve();
     }).catch((error) => {
@@ -109,7 +111,7 @@ async function pushMotherPNC() {
           OpenMrsAPIObject.postMotherPNCData(result)
             .then((motherPNCResponse) => {
               if (result) {
-                console.log('Updating Mother PNC records')
+                console.log("Updating Mother PNC records");
                 console.log(result.submission_uuid);
               }
             })
@@ -141,15 +143,15 @@ async function pushInfantPNC() {
           );
 
           OpenMrsAPIObject.postInfantPNCData(result)
-          	.then((infantPNCResponse)=>{
-          		if(result) {
-          			console.log('Updating Infant PNC records')
+            .then((infantPNCResponse) => {
+              if (result) {
+                console.log("Updating Infant PNC records");
                 console.log(result.submission_uuid);
-          		}
-          	})
-          	.catch(error=>{
-          		console.log(error)
-          	})
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         });
         return resolve();
       });
