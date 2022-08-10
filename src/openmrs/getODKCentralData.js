@@ -36,6 +36,30 @@ function updateOpenmrsErrorMessage  (tableName, id,error) {
   })
 }
 
+//L & D status
+function updateOpenmrsStatusLD(tableName, id,message) {
+  return new Promise((resolve, reject) =>{
+      sqlBuilder.updateOpenMRSStatusLD(tableName, id,message)
+        .then(result => {
+          return resolve(result)
+        })
+        .catch(error => {
+          return reject(`Error while updating record in staging table ${tableName}: ${error}\n`)
+        })
+  })
+}
+
+function updateOpenmrsErrorMessageLD(tableName, id,error) {
+  return new Promise((resolve, reject) =>{
+      sqlBuilder.updateOpenmrsErrorMessageLD(tableName, id,error)
+        .then(result => {
+          return resolve(result)
+        })
+        .catch(error => {
+          return reject(`Error while updating error message column ${tableName}: ${error}\n`)
+        })
+  })
+}
 
 function getInfants(tableName, ptrackerId) {
     return new Promise((resolve, reject) =>{
@@ -50,5 +74,5 @@ function getInfants(tableName, ptrackerId) {
 }
 
 module.exports = {
-    getSubmissionData, updateOpenmrsStatus, getInfants,updateOpenmrsErrorMessage
+    getSubmissionData, updateOpenmrsStatus, getInfants,updateOpenmrsErrorMessage,updateOpenmrsStatusLD,updateOpenmrsErrorMessageLD
 };

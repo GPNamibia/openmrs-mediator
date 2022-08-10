@@ -4,7 +4,6 @@ const db = require('./models');
 const app = express();
 const PORT = privateConfig.appConfig.PORT
 const pushData = require('./openmrs/pushODKData.js') 
-// const PNCInfantAPIObject = new PNCInfantAPI();
 const { getQueryParameters } = require('./openhim/initialize');
 
 //openHIM

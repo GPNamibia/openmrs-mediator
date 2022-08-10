@@ -30,13 +30,35 @@ async function updateOpenmrsErrorMessage(model, submission_uuid,error) {
     }
 }
 
+//L & D status
+async function updateOpenMRSStatusLD(model, infant_id,message) {
+  const foundItem = await model.findOne({ where: { infant_id: infant_id } })
+    if (foundItem) {
+        const item = await model.update({ openmrs_status: message }, { where: { infant_id: infant_id } })
+        return { item, created: false }
+    }
+}
+
+async function updateOpenmrsErrorMessageLD(model, infant_id,error) {
+  const foundItem = await model.findOne({ where: { infant_id: infant_id } })
+    if (foundItem) {
+        const item = await model.update({ openmrs_error_message: error }, { where: { infant_id: infant_id } })
+        return { item, created: false }
+    }
+}
+
 async function getInfants(model, ptrackerId) {
   infants = model.findAll(
-    { where: { ptracker_id: ptrackerId } }
-  )
+    { where:
+      { 
+        openmrs_status: { 
+          [Op.or]: { 
+            [Op.not]: 'created',
+             [Op.eq]: null, }, },[Op.and]: {ptracker_id:ptrackerId}},
+   })
     return infants
 }
 
 module.exports = {
-	readData, updateOpenMRSStatus, getInfants,updateOpenmrsErrorMessage
+	readData, updateOpenMRSStatus, getInfants,updateOpenmrsErrorMessage,updateOpenMRSStatusLD,updateOpenmrsErrorMessageLD
 }

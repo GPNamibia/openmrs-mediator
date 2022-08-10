@@ -105,6 +105,11 @@
 
 
     },
+    "kin_attributes":{
+      "odk_kin_name":"dc0cf7a8-dede-4c3d-9db4-730900aedd1a",
+      "odk_phone_number": "14d4f066-15f5-102d-96e4-000c29c2a5d7",
+      "odk_kin_contact":"d135bf7c-6ddd-4636-be22-fbd334a8f134"
+    },
     "identifier_type":{
         "ptracker_number": "4da0a3fe-e546-463f-81fa-084f098ff06c",
         "openmrs_id":"05a29f94-c0ed-11e2-94be-8c13b969e334"
@@ -308,7 +313,8 @@
     "odkRapidTestResult": {
       "1": "703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
       "2":"664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  
-      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
+      "66":"54b96458-6585-4c4c-a5b1-b3ca7f1be351",
+      "88":"54b96458-6585-4c4c-a5b1-b3ca7f1be351"
     },
     
     "odkTestResult": {

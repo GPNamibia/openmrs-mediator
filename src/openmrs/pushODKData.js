@@ -6,6 +6,7 @@ const {
   stag_odk_delivery,
   stag_odk_pnc_mother,
   stag_odk_pnc_infant,
+  stag_odk_delivery_infant,
 } = require("../../src/models");
 const { resolve } = require("path");
 
@@ -65,25 +66,23 @@ async function pushLabourAndDelivery() {
           `*********************posting Labour and Delivery record submission UUID = ${result.submission_uuid}*************************`
         );
 
-        OpenMrsAPIObject.postDeliveryData(result)
-          .then((lndDataResponse) => {
-            if (result) {
-              console.log(result.submission_uuid);
-              odkCentralStagingData
-                .updateOpenmrsStatus(stag_odk_delivery, result.submission_uuid)
-                .then((updateResponse) => {
-                  console.log(
-                    `ODK staging record for labor and delivery submission UUID = ${result.submission_uuid}) Openmrs status updated successfully`
-                  );
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            }
+        //Infant data
+        odkCentralStagingData.getInfants(stag_odk_delivery_infant,result.ptracker_id).then((res) => {
+          return new Promise((resolve, reject) => {
+            res.forEach(response => {
+              OpenMrsAPIObject.postDeliveryData(result,response)
+              .then((lndDataResponse) => {
+                if (result) {
+                  console.log('Updating L & D records')
+                  console.log(result.submission_uuid);
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+            });
           })
-          .catch((error) => {
-            console.log(error);
-          });
+        })
       });
       return resolve();
     }).catch((error) => {
@@ -110,19 +109,8 @@ async function pushMotherPNC() {
           OpenMrsAPIObject.postMotherPNCData(result)
             .then((motherPNCResponse) => {
               if (result) {
-                odkCentralStagingData
-                  .updateOpenmrsStatus(
-                    stag_odk_pnc_mother,
-                    result.submission_uuid
-                  )
-                  .then((updateResponse) => {
-                    console.log(
-                      `ODK staging PNC mother record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully`
-                    );
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
+                console.log('Updating Mother PNC records')
+                console.log(result.submission_uuid);
               }
             })
             .catch((error) => {
@@ -156,13 +144,7 @@ async function pushInfantPNC() {
           	.then((infantPNCResponse)=>{
           		if(result) {
           			console.log('Updating Infant PNC records')
-          			odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_infant, result.submission_uuid)
-          			.then(updateResponse=>{
-          				console.log(`ODK staging PNC Infant record submission_uuid = ${result.submission_uuid}) Openmrs status updated successfully`)
-          			})
-          			.catch(error=>{
-          				console.log(error)
-          			})
+                console.log(result.submission_uuid);
           		}
           	})
           	.catch(error=>{
