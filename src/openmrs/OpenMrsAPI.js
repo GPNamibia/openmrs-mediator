@@ -255,7 +255,6 @@ class OpenMrsAPI {
                   console.log(
                     "*****************************Getting Infant Obs ***************"
                   );
-                  setTimeout(async() => {
                   //Getting infant obs
                   await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter
                   ).then(async(infantObs) => {
@@ -291,7 +290,6 @@ class OpenMrsAPI {
                   }).catch((error) => {
                     console.log(error);
                   });
-                }, 5000);
                   console.log(
                     `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
                   );
@@ -390,7 +388,6 @@ class OpenMrsAPI {
                     console.log(
                       "*****************************Getting Infant Obs ***************"
                     );
-                    setTimeout(async() => {
                     await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
                     .then(async(infantObs) => {
                       infantObs.forEach(async(result, index) => {
@@ -424,7 +421,7 @@ class OpenMrsAPI {
                     }).catch((error) => {
                       console.log(error);
                     });
-                  }, 5000);
+                    
                     console.log(
                       `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
                     );
