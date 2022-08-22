@@ -1,0 +1,45 @@
+{
+    "Districts": {
+        "1": "Andara District",
+        "2": "Aranos District",
+        "3": "Eenhana District",
+        "4": "Engela District",
+        "5": "Gobabis District",
+        "6": "Grootfontein District", 
+
+        "7": "Karasburg District",
+        "8": "Katima Mulilo District",
+        "9": "Keetmanshoop District",
+        "10": "Khorixas District",
+        "11": "Luderitz District",
+        "12": "Mariental District", 
+
+        "13": "Nankudu District",
+        "14": "Nyangana District",
+        "15": "Okahandja District",
+        "16": "Okahao District",
+        "17": "Okakarara District",
+        "18": "Okongo District", 
+
+        "19": "Omaruru District",
+        "20": "Omuthiya District",
+        "21": "Onandjokwe District",
+        "22": "Opuwo District",
+        "23": "Oshakati District",
+        "24": "Oshikuku District", 
+
+        "25": "Otjiwarongo District",
+        "26": "Outapi District",
+        "27": "Outjo District",
+        "28": "Rehoboth District",
+        "29": "Rundu District",
+        "30": "Swakopmund District", 
+
+        "31": "Tsandi District",
+        "32": "Tsumeb District",
+        "33": "Usakos District",
+        "34": "Walvis Bay District",
+        "35": "Windhoek District"
+        
+      }
+}

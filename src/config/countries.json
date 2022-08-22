@@ -1,0 +1,12 @@
+{
+  "Countries": {
+    "1": "Namibia",
+    "2": "Angola",
+    "3": "Zambia",
+    "4": "Zimbabwe",
+    "5": "Botswana",
+    "6": "South Africa", 
+    "99": "Other",
+    "66": "Missing"
+  }
+}
