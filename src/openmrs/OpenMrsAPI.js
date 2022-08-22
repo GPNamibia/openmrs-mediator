@@ -209,7 +209,6 @@ class OpenMrsAPI {
                 .then(async (deliveryEncounter) => {
                   console.log("***************************** Creating Delivery Encounter ***************");
                   let encounter = deliveryEncounter.body;
-                  console.log(encounter);
                   console.log("***************************** Creating Infant Person ***************");
                     //Creating infant person
                     await this.createInfantPatient(infantDeliveryData,deliveryData,locationUUID)
@@ -256,13 +255,14 @@ class OpenMrsAPI {
                   console.log(
                     "*****************************Getting Infant Obs ***************"
                   );
+                  setTimeout(async() => {
                   //Getting infant obs
                   await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter
-                  ).then((infantObs) => {
+                  ).then(async(infantObs) => {
                     // console.log(encounter)
                     //infant instance
-                    infantObs.forEach((result, index) => {
-                      this.infantChildInstance(index).then(async (res) => {
+                    infantObs.forEach(async(result, index) => {
+                     await this.infantChildInstance(index).then(async (res) => {
                         let body = {
                           obsDatetime: deliveryData["visit_date"],
                           person: currentPatient.uuid,
@@ -284,9 +284,14 @@ class OpenMrsAPI {
                           body: body,
                         };
                         return resolve(this.sendRequest(options));
+                      }).catch((error) => {
+                        console.log(error);
                       });
                     });
+                  }).catch((error) => {
+                    console.log(error);
                   });
+                }, 5000);
                   console.log(
                     `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
                   );
@@ -329,7 +334,7 @@ class OpenMrsAPI {
                     "***************************** Creating Delivery Encounter ***************"
                   );
                   let encounter = deliveryEncounter.body;
-                  console.log(encounter);
+                  // console.log(encounter);
                   console.log(
                     "***************************** Creating Infant Person ***************"
                   );
@@ -385,10 +390,12 @@ class OpenMrsAPI {
                     console.log(
                       "*****************************Getting Infant Obs ***************"
                     );
-                    await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter).then((infantObs) => {
-                      infantObs.forEach((result, index) => {
+                    setTimeout(async() => {
+                    await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
+                    .then(async(infantObs) => {
+                      infantObs.forEach(async(result, index) => {
                         //infant instance
-                        this.infantChildInstance(index).then(async (res) => {
+                        await this.infantChildInstance(index).then(async (res) => {
                           let body = {
                             obsDatetime: deliveryData["visit_date"],
                             person: patientBody.uuid,
@@ -410,9 +417,14 @@ class OpenMrsAPI {
                             body: body,
                           };
                           return resolve(this.sendRequest(options));
+                        }).catch((error) => {
+                          console.log(error);
                         });
                       });
+                    }).catch((error) => {
+                      console.log(error);
                     });
+                  }, 5000);
                     console.log(
                       `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
                     );
