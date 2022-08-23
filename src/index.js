@@ -23,13 +23,6 @@ app.all('*', async (req, res) => {
     }
   }) 
 });
-pushData.pushODKData().then(result => {
-  try {
-   // res.json('PTracker Data from ODK Central sent successfully to openmrs.')
-  } catch (error) {
-      console.error(`Error sending data to PTracker: ${error}`)
-  }
-}) 
 
 
 //Server PORT
