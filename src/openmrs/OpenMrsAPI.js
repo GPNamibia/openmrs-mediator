@@ -210,58 +210,58 @@ class OpenMrsAPI {
                   console.log("***************************** Creating Delivery Encounter ***************");
                   let encounter = deliveryEncounter.body;
                   console.log("***************************** Creating Infant Person ***************");
-                    //Creating infant person
-                    await this.createInfantPatient(infantDeliveryData,deliveryData,locationUUID)
-                      .then(async (infant) => {
-                        // console.log(infant)
-                        console.log(
-                          `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
-                        );
-                        //Creating relationship infant-parent
-                         this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
-                          .then((res) => {
-                            // console.log(res);
-                            console.log(
-                              `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
-                            );
-                          }).catch((err) => {
-                            console.log(
-                              `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
-                            );
-                          });
-                        //update openmrs status
-                        odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]} Openmrs status updated successfully  ✅`
-                            );
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      }).catch((err) => {
-                        console.log(`Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`);
-                        //update openmrs status
-                        odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
-                          .then((updateResponse) => {
-                            odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
-                            // console.log(`ODK staging record submission_uuid = ${infantDeliveryData["Submissions_uuid"]}) Openmrs status updated successfully  ✅`);
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${err}`);
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${err}`);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      });
+                  //Creating infant person
+                  await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
+                    .then(async (infant) => {
+                      // console.log(infant)
+                      console.log(
+                        `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
+                      );
+                      //Creating relationship infant-parent
+                      this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
+                        .then((res) => {
+                          // console.log(res);
+                          console.log(
+                            `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
+                          );
+                        }).catch((err) => {
+                          console.log(
+                            `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
+                          );
+                        });
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]} Openmrs status updated successfully  ✅`
+                          );
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    }).catch((err) => {
+                      console.log(`Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`);
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
+                        .then((updateResponse) => {
+                          odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
+                          // console.log(`ODK staging record submission_uuid = ${infantDeliveryData["Submissions_uuid"]}) Openmrs status updated successfully  ✅`);
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${err}`);
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${err}`);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    });
                   console.log(
                     "*****************************Getting Infant Obs ***************"
                   );
                   //Getting infant obs
                   await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter
-                  ).then(async(infantObs) => {
+                  ).then(async (infantObs) => {
                     // console.log(encounter)
                     //infant instance
-                    infantObs.forEach(async(result, index) => {
-                     await this.infantChildInstance(index).then(async (res) => {
+                    infantObs.forEach(async (result, index) => {
+                      await this.infantChildInstance(index).then(async (res) => {
                         let body = {
                           obsDatetime: deliveryData["visit_date"],
                           person: currentPatient.uuid,
@@ -336,61 +336,61 @@ class OpenMrsAPI {
                   console.log(
                     "***************************** Creating Infant Person ***************"
                   );
-                    //Creating infant person
-                    await this.createInfantPatient(infantDeliveryData,deliveryData,locationUUID)
-                      .then(async (infant) => {
-                        // console.log(infant)
-                        console.log(
-                          `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
-                        );
-                        //Creating relationship infant-parent
-                         this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
-                          .then((res) => {
-                            // console.log(res);
-                            console.log(
-                              `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
-                            );
-                          })
-                          .catch((err) => {
-                            console.log(
-                              `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
-                            );
-                          });
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
-                            );
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      }).catch((err) => {
-                        console.log(
-                          `Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`
-                        );
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
-                          .then((updateResponse) => {
-                            odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
-                            console.log(
-                              `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
-                            );
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${err}`);
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${err}`);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      });
-                    console.log(
-                      "*****************************Getting Infant Obs ***************"
-                    );
-                    await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
-                    .then(async(infantObs) => {
-                      infantObs.forEach(async(result, index) => {
+                  //Creating infant person
+                  await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
+                    .then(async (infant) => {
+                      // console.log(infant)
+                      console.log(
+                        `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
+                      );
+                      //Creating relationship infant-parent
+                      this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
+                        .then((res) => {
+                          // console.log(res);
+                          console.log(
+                            `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
+                          );
+                        })
+                        .catch((err) => {
+                          console.log(
+                            `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
+                          );
+                        });
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
+                          );
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    }).catch((err) => {
+                      console.log(
+                        `Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
+                        .then((updateResponse) => {
+                          odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
+                          console.log(
+                            `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${err}`);
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${err}`);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                  console.log(
+                    "*****************************Getting Infant Obs ***************"
+                  );
+                  await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
+                    .then(async (infantObs) => {
+                      infantObs.forEach(async (result, index) => {
                         //infant instance
                         await this.infantChildInstance(index).then(async (res) => {
                           let body = {
@@ -421,38 +421,38 @@ class OpenMrsAPI {
                     }).catch((error) => {
                       console.log(error);
                     });
-                    
-                    console.log(
-                      `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                  }).catch((err) => {
-                    console.log(
-                      `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                  });
-                }
+
+                  console.log(
+                    `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
+                  );
+                  //update openmrs status
+                  odkCentralStagingData
+                    .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
+                    .then((updateResponse) => {
+                      console.log(
+                        `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                      );
+                    }).catch((error) => {
+                      console.log(error);
+                    });
+                }).catch((err) => {
+                  console.log(
+                    `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
+                  );
+                  //update openmrs status
+                  odkCentralStagingData
+                    .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
+                    .then((updateResponse) => {
+                      console.log(
+                        `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                      );
+                      //update openmrs error table
+                      odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
+                    }).catch((error) => {
+                      console.log(error);
+                    });
+                });
+            }
           }
         );
       });
@@ -602,24 +602,6 @@ class OpenMrsAPI {
               "**************Patient found with specified identifier **********"
             );
             currentPatient = patientRecord[0];
-
-            if (pncData["parent_ptracker_id"]) {
-              console.log(
-                "**********************linking mother to child**********************"
-              );
-              this.createRelationShip(
-                currentPatient,
-                pncData["parent_ptracker_id"]
-              )
-                .then((patientLink) => {
-                  console.log(
-                    "****************linked mother to child**********************"
-                  );
-                })
-                .catch((error) => {
-                  console.error(`Error linking infant to parent: ${error}`);
-                });
-            }
             //creating encounter
             this.createInfantPNCEncounter(currentPatient, pncData, locationUUID)
               .then((pncInfantEncounter) => {
@@ -631,6 +613,19 @@ class OpenMrsAPI {
                   `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
                 );
                 // return resolve(ancEncounter);
+                //Creating relationship infant-parent
+                if (pncData["parent_ptracker_id"]) {
+                  console.log("**********************linking mother to child**********************");
+                  this.createRelationShip(currentPatient, pncData["parent_ptracker_id"])
+                    .then((patientLink) => {
+                      console.log(patientLink)
+                      console.log(
+                        "****************linked mother to child**********************"
+                      );
+                    }).catch((error) => {
+                      console.error(`Error linking infant to parent: ${error} 🚫`);
+                    });
+                }
                 //update openmrs status
                 odkCentralStagingData
                   .updateOpenmrsStatus(
@@ -676,25 +671,6 @@ class OpenMrsAPI {
           } else {
             console.log("**************Creating new Patient************* ");
             let newPatient = await this.createPatient(pncData, locationUUID);
-            if (pncData["parent_ptracker_id"]) {
-              console.log(
-                "**********************linking parent to child**********************"
-              );
-              try {
-                let relationship = await this.createRelationShip(
-                  newPatient,
-                  pncData["parent_ptracker_id"]
-                );
-                console.log(
-                  "****************linked parent to child**********************"
-                );
-              } catch (error) {
-                console.log(
-                  "****************Error linking parent to child**********************"
-                );
-                console.log(error);
-              }
-            }
             let patientBody = newPatient.body;
             console.log(`Patient UUID ${patientBody.uuid}`);
             //creating encounter
@@ -707,6 +683,19 @@ class OpenMrsAPI {
                   `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
                 );
                 // return resolve(ancEncounter);
+                //Creating relationship infant-parent
+                if (pncData["parent_ptracker_id"]) {
+                  console.log("**********************linking mother to child**********************");
+                  this.createRelationShip(newPatient, pncData["parent_ptracker_id"])
+                    .then((patientLink) => {
+                      console.log(patientLink)
+                      console.log(
+                        "****************linked mother to child**********************"
+                      );
+                    }).catch((error) => {
+                      console.error(`Error linking infant to parent: ${error} 🚫`);
+                    });
+                }
                 //update openmrs status
                 odkCentralStagingData
                   .updateOpenmrsStatus(
@@ -764,8 +753,9 @@ class OpenMrsAPI {
           let body = {
             relationshipType: uuids.relationshipType.parentToChild,
             personA: results[0].uuid,
-            personB: currentPatient.uuid,
+            personB: currentPatient.body.uuid,
           };
+          console.log(body)
           let options = {
             method: "POST",
             url: privateConfig.openmrsConfig.apiURL + `relationship`,
@@ -777,7 +767,7 @@ class OpenMrsAPI {
               pass: privateConfig.openmrsConfig.password,
             },
             json: true,
-            body:body,
+            body: body,
           };
           return resolve(this.sendRequest(options));
         }
@@ -788,7 +778,7 @@ class OpenMrsAPI {
   //L & D infant relationship
   createInfantRelationShip(currentPatient, parentPtrackerId) {
     return new Promise((resolve, reject) => {
-      if(currentPatient.body.uuid){
+      if (currentPatient.body.uuid) {
         this.getPatientUsingId(parentPtrackerId).then((parent) => {
           let results = JSON.parse(parent.body)["results"];
           if (results && results.length > 0) {
@@ -808,13 +798,13 @@ class OpenMrsAPI {
                 pass: privateConfig.openmrsConfig.password,
               },
               json: true,
-              body:body,
+              body: body,
             };
             return resolve(this.sendRequest(options));
           }
           return reject("Relationship not created");
         });
-      }else{
+      } else {
         console.log("Infant openMRS data missing !!");
       }
     });
@@ -976,25 +966,25 @@ class OpenMrsAPI {
     };
     return this.sendRequest(options);
   }
-//Country maping
-async countryMapping(country) {
-  if (country in countries.Countries) {
-    return countries.Countries[country];
+  //Country maping
+  async countryMapping(country) {
+    if (country in countries.Countries) {
+      return countries.Countries[country];
+    }
+    return "Unknown country specified.";
   }
-  return "Unknown country specified.";
-}
-//District maping
-async districtMapping(district) {
-  if (district in districts.Districts) {
-    return districts.Districts[district];
-  }
-  return "Unknown district specified.";
+  //District maping
+  async districtMapping(district) {
+    if (district in districts.Districts) {
+      return districts.Districts[district];
+    }
+    return "";
 
-}
+  }
   //Create patient
   async createPatient(data, locationUUID) {
-    var country= await this.countryMapping(data["country"]);
-    var district=await this.districtMapping(data["district"]);
+    var country = await this.countryMapping(data["country"]);
+    var district = await this.districtMapping(data["district"]);
 
     console.log(country)
     console.log(district)
@@ -1062,20 +1052,20 @@ async districtMapping(district) {
     return this.sendRequest(options);
   }
   //Create infnt patient
-  async createInfantPatient(infantData,motherData,locationUUID) {
+  async createInfantPatient(infantData, motherData, locationUUID) {
     //Check if infant has ptracker id
-    if(infantData["infant_ptracker_id"]){
-      var country= await this.countryMapping(motherData["country"]);
-      var district=await this.districtMapping(motherData["district"]);
+    if (infantData["infant_ptracker_id"]) {
+      var country = await this.countryMapping(motherData["country"]);
+      var district = await this.districtMapping(motherData["district"]);
 
       let postalCode = "";
-      let family="TBD";
-      let given="TBD";
-      let middle="TBD";
-      let age="";
-      let kinName="";
-      let kinContact="";
-      let contact="";
+      let family = "TBD";
+      let given = "TBD";
+      let middle = "TBD";
+      let age = "";
+      let kinName = "";
+      let kinContact = "";
+      let contact = "";
       let person = await this.createPerson(
         family,
         given,
@@ -1092,7 +1082,7 @@ async districtMapping(district) {
         kinContact,
         contact
       );
-  
+
       console.log("***********Created person**************");
       let personBody = person.body;
       console.log(infantData);
@@ -1100,11 +1090,11 @@ async districtMapping(district) {
       console.log("***************Getting location****************");
       let location = await this.getLocation(motherData["facility_name"]);
       let locationBody = location.body;
-  
+
       console.log("***************Getting openmrs ID ****************");
       let openmrsIDResult = await this.generateOpenMRSID();
       let openMRSID = openmrsIDResult.body.identifiers[0];
-  
+
       let patientBody = {
         person: personBody.uuid,
         identifiers: [
@@ -1121,7 +1111,7 @@ async districtMapping(district) {
             preferred: false,
           },
         ],
-      };  
+      };
       console.log("******************creating patient options****************");
       let options = {
         method: "POST",
@@ -1137,7 +1127,7 @@ async districtMapping(district) {
         body: patientBody,
       };
       return this.sendRequest(options);
-    }else{
+    } else {
       console.log("infant Ptracker id missing !!")
     }
   }
@@ -1221,8 +1211,8 @@ async districtMapping(district) {
         addresses: [
           {
             address1: address1,
-            address2:location,
-            countyDistrict:district,
+            address2: location,
+            countyDistrict: district,
             country: country,
             postalCode: postalCode,
           }
@@ -1252,8 +1242,8 @@ async districtMapping(district) {
         addresses: [
           {
             address1: address1,
-            address2:location,
-            countyDistrict:district,
+            address2: location,
+            countyDistrict: district,
             country: country,
             postalCode: postalCode,
           }
@@ -1298,295 +1288,295 @@ async districtMapping(district) {
       // --ANC--
       //anc_first_visit
       if (data["anc_first_visit"]) {
-          if (data["anc_first_visit"] == "1") {
-              obs.push({
-                  concept: uuids.obs.anc_first_visit,
-                  value: uuids.odkYesNo["1"],
-              });
-          }
-          if (data["anc_first_visit"] == "0") {
-              obs.push({
-                  concept: uuids.obs.anc_first_visit,
-                  value: uuids.odkYesNo["2"],
-              });
-          }
-      } else {
+        if (data["anc_first_visit"] == "1") {
           obs.push({
-              concept: uuids.obs.anc_first_visit,
-              value: uuids.odkYesNo["66"],
+            concept: uuids.obs.anc_first_visit,
+            value: uuids.odkYesNo["1"],
           });
+        }
+        if (data["anc_first_visit"] == "0") {
+          obs.push({
+            concept: uuids.obs.anc_first_visit,
+            value: uuids.odkYesNo["2"],
+          });
+        }
+      } else {
+        obs.push({
+          concept: uuids.obs.anc_first_visit,
+          value: uuids.odkYesNo["66"],
+        });
       }
       //anc_gravida
       if (data["anc_gravida"]) {
-          obs.push({
-              concept: uuids.obs.anc_gravida,
-              value: data["anc_gravida"],
-          });
+        obs.push({
+          concept: uuids.obs.anc_gravida,
+          value: data["anc_gravida"],
+        });
       } else {
-          console.log("anc_gravida");
+        console.log("anc_gravida");
       }
       //anc_para
       if (data["anc_para"]) {
-          obs.push({
-              concept: uuids.obs.anc_para,
-              value: data["anc_para"],
-          });
+        obs.push({
+          concept: uuids.obs.anc_para,
+          value: data["anc_para"],
+        });
       } else {
-          console.log("Missing anc_para!");
+        console.log("Missing anc_para!");
       }
       //anc_edd_calculated
       if (data["anc_edd_calculated"]) {
-          obs.push({
-              concept: uuids.obs.anc_edd_calculated, // edd obs uuid
-              value: data["anc_edd_calculated"],
-          });
+        obs.push({
+          concept: uuids.obs.anc_edd_calculated, // edd obs uuid
+          value: data["anc_edd_calculated"],
+        });
       } else if (data["anc_edd"]) {
-          obs.push({
-              concept: uuids.obs.anc_edd_calculated, // edd obs uuid
-              value: data["anc_edd"],
-          });
+        obs.push({
+          concept: uuids.obs.anc_edd_calculated, // edd obs uuid
+          value: data["anc_edd"],
+        });
       } else {
-          console.log("Missing anc_edd_calculated!");
+        console.log("Missing anc_edd_calculated!");
       }
       //anc_lnmp
       if (data["anc_lnmp"]) {
-          obs.push({
-              concept: uuids.obs.anc_lnmp,
-              value: data["anc_lnmp"],
-          });
+        obs.push({
+          concept: uuids.obs.anc_lnmp,
+          value: data["anc_lnmp"],
+        });
       } else {
-          console.log("Missing anc_lnmp!");
+        console.log("Missing anc_lnmp!");
       }
       //next_visit_date
       if (data["next_visit_date"]) {
-          obs.push({
-              concept: uuids.obs.next_visit_date,
-              value: data["next_visit_date"],
-          });
+        obs.push({
+          concept: uuids.obs.next_visit_date,
+          value: data["next_visit_date"],
+        });
       } else {
-          console.log("Missing next_visit_date!");
+        console.log("Missing next_visit_date!");
       }
       //next_visit_date_missing
       if (data["next_visit_date_missing"]) {
-          obs.push({
-              concept: uuids.obs.next_visit_date_missing,
-              value: true,
-          });
+        obs.push({
+          concept: uuids.obs.next_visit_date_missing,
+          value: true,
+        });
       } else {
-          console.log("Missing next_visit_date_missing!");
+        console.log("Missing next_visit_date_missing!");
       }
       //next_facility_to_visit
       if (data["next_facility_to_visit"]) {
-          obs.push({
-              concept: uuids.obs.next_facility_to_visit,
-              value: uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]],
-          });
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit,
+          value: uuids.odkNextFacilityToVisit[data["next_facility_to_visit"]],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.next_facility_to_visit,
-              value: uuids.odkNextFacilityToVisit["66"],
-          });
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit,
+          value: uuids.odkNextFacilityToVisit["66"],
+        });
       }
       //next_facility_to_visit_transfered
       if (data["next_facility_to_visit_transfered"]) {
-          obs.push({
-              concept: uuids.obs.next_facility_to_visit_transfered,
-              value: data["next_facility_to_visit_transfered"],
-          });
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit_transfered,
+          value: data["next_facility_to_visit_transfered"],
+        });
       } else {
-          console.log("Missing next_facility_to_visit_transfered!");
+        console.log("Missing next_facility_to_visit_transfered!");
       }
       //next_facility_to_visit_transfered_other
       if (data["next_facility_to_visit_transfered_other"]) {
-          obs.push({
-            concept: uuids.obs.next_facility_to_visit_transfered_other,
-            value: data["next_facility_to_visit_transfered_other"],
-          });
-        } else {
-          console.log("Missing next_facility_to_visit_transfered_other");
-        }
+        obs.push({
+          concept: uuids.obs.next_facility_to_visit_transfered_other,
+          value: data["next_facility_to_visit_transfered_other"],
+        });
+      } else {
+        console.log("Missing next_facility_to_visit_transfered_other");
+      }
       //--HIV STATUS--
 
       //hiv_test_status
       if (data["hiv_test_status"]) {
-          obs.push({
-              concept: uuids.obs.hiv_test_status,
-              value: uuids.odkHIVTestStatus[data["hiv_test_status"]],
-          });
+        obs.push({
+          concept: uuids.obs.hiv_test_status,
+          value: uuids.odkHIVTestStatus[data["hiv_test_status"]],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.hiv_test_status,
-              value: uuids.odkHIVTestStatus["66"],
-          });
+        obs.push({
+          concept: uuids.obs.hiv_test_status,
+          value: uuids.odkHIVTestStatus["66"],
+        });
       }
       //hiv_test_result
       if (data["hiv_test_result"]) {
-          obs.push({
-              concept: uuids.obs.hiv_test_result,
-              value: uuids.odkHivTestResult[data["hiv_test_result"].toString()],
-          });
+        obs.push({
+          concept: uuids.obs.hiv_test_result,
+          value: uuids.odkHivTestResult[data["hiv_test_result"].toString()],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.hiv_test_result,
-              value: uuids.odkHivTestResult["66"],
-          });
+        obs.push({
+          concept: uuids.obs.hiv_test_result,
+          value: uuids.odkHivTestResult["66"],
+        });
       }
       //art_int_status
       if (data["art_int_status"]) {
-          obs.push({
-              concept: uuids.obs.art_int_status,
-              value:
-                  uuids.odkARTInitiationStatus[data["art_int_status"].toString()],
-          });
+        obs.push({
+          concept: uuids.obs.art_int_status,
+          value:
+            uuids.odkARTInitiationStatus[data["art_int_status"].toString()],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.art_int_status,
-              value: uuids.odkARTInitiationStatus["66"],
-          });
+        obs.push({
+          concept: uuids.obs.art_int_status,
+          value: uuids.odkARTInitiationStatus["66"],
+        });
       }
       //art initiation
       if (data["art_int_status_refused_reason"]) {
-          obs.push({
-              concept: uuids.obs.art_int_refused_reason,
-              value: data["art_int_status_refused_reason"],
-          });
+        obs.push({
+          concept: uuids.obs.art_int_refused_reason,
+          value: data["art_int_status_refused_reason"],
+        });
       } else {
-          console.log("Missing art_int_status_refused_reason!");
+        console.log("Missing art_int_status_refused_reason!");
       }
       //art_int_status_refused_reason_missing
       if (data["art_int_status_refused_reason_missing"] == "66") {
-          obs.push({
-              concept: uuids.obs.art_int_status_refused_reason_missing,
-              value: true,
-          });
+        obs.push({
+          concept: uuids.obs.art_int_status_refused_reason_missing,
+          value: true,
+        });
       } else {
-          console.log("Missing art_int_status_refused_reason_missing!");
+        console.log("Missing art_int_status_refused_reason_missing!");
       }
       //art_number
       if (data["art_number"]) {
-          obs.push({
-              concept: uuids.obs.art_number,
-              value: data["art_number"],
-          });
+        obs.push({
+          concept: uuids.obs.art_number,
+          value: data["art_number"],
+        });
       } else {
-          if (data["art_number_missing"]) {
-              obs.push({
-                  concept: uuids.obs.art_number_missing,
-                  value: true,
-              });
-          } else {
-              console.log("Missing art_number_missing");
-          }
+        if (data["art_number_missing"]) {
+          obs.push({
+            concept: uuids.obs.art_number_missing,
+            value: true,
+          });
+        } else {
+          console.log("Missing art_number_missing");
+        }
       }
       //art_start_date
       if (data["art_start_date"]) {
-          obs.push({
-              concept: uuids.obs.art_start_date,
-              value: data["art_start_date"],
-          });
+        obs.push({
+          concept: uuids.obs.art_start_date,
+          value: data["art_start_date"],
+        });
       } else {
-          console.log("Missing art_start_date!");
+        console.log("Missing art_start_date!");
       }
       //art_start_date_missing
       if (data["art_start_date_missing"]) {
-          obs.push({
-              concept: uuids.obs.artStartDateMissing,
-              value: true,
-          });
+        obs.push({
+          concept: uuids.obs.artStartDateMissing,
+          value: true,
+        });
       } else {
-          console.log("Missing art_start_date_missing!");
+        console.log("Missing art_start_date_missing!");
       }
       //vl_test_done
       if (data["vl_test_done"]) {
-          obs.push({
-              concept: uuids.obs.vl_test_done,
-              value: uuids.odkVLTestDone[data["vl_test_done"].toString()],
-          });
+        obs.push({
+          concept: uuids.obs.vl_test_done,
+          value: uuids.odkVLTestDone[data["vl_test_done"].toString()],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.vl_test_done,
-              value: uuids.odkVLTestDone["66"],
-          });
+        obs.push({
+          concept: uuids.obs.vl_test_done,
+          value: uuids.odkVLTestDone["66"],
+        });
       }
       //vl_test_date
       if (data["vl_test_date"]) {
-          obs.push({
-              concept: uuids.obs.vl_test_date,
-              value: data["vl_test_date"],
-          });
+        obs.push({
+          concept: uuids.obs.vl_test_date,
+          value: data["vl_test_date"],
+        });
       } else {
-          console.log("Missing vl_test_date!");
+        console.log("Missing vl_test_date!");
       }
       //vl_test_result
-      if (data["vl_test_result"]) { 
-          if (data["vl_test_result"] == "2") {
-            obs.push({
-              concept: uuids.obs.vl_test_result,
-              value: uuids.odkVLTestResult["0"],
-            });
-          }
+      if (data["vl_test_result"]) {
+        if (data["vl_test_result"] == "2") {
           obs.push({
             concept: uuids.obs.vl_test_result,
-            value: uuids.odkVLTestResult[data["vl_test_result"].toString()],
-          });
-        } else {
-          obs.push({
-            concept: uuids.obs.vl_test_result,
-            value: uuids.odkVLTestResult["66"],
+            value: uuids.odkVLTestResult["0"],
           });
         }
-         //vl_test_result_value
-      if (data["vl_test_result_value"]) {
-          obs.push({
-              concept: uuids.obs.vl_test_result_value,
-              value: data["vl_test_result_value"],
-          });
+        obs.push({
+          concept: uuids.obs.vl_test_result,
+          value: uuids.odkVLTestResult[data["vl_test_result"].toString()],
+        });
       } else {
-          console.log("Missing vl_test_result_value!");
+        obs.push({
+          concept: uuids.obs.vl_test_result,
+          value: uuids.odkVLTestResult["66"],
+        });
+      }
+      //vl_test_result_value
+      if (data["vl_test_result_value"]) {
+        obs.push({
+          concept: uuids.obs.vl_test_result_value,
+          value: data["vl_test_result_value"],
+        });
+      } else {
+        console.log("Missing vl_test_result_value!");
       }
 
-       //--PATNER TESTING--
-       //partner_hivtest_done
+      //--PATNER TESTING--
+      //partner_hivtest_done
       if (data["partner_hivtest_done"]) {
-          obs.push({
-              concept: uuids.obs.partner_hivtest_done,
-              value: uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()],
-          });
+        obs.push({
+          concept: uuids.obs.partner_hivtest_done,
+          value: uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.partner_hivtest_done,
-              value: uuids.odkHIVTestDone["66"],
-          });
+        obs.push({
+          concept: uuids.obs.partner_hivtest_done,
+          value: uuids.odkHIVTestDone["66"],
+        });
       }
       //partner_hivtest_date
       if (data["partner_hivtest_date"]) {
-          obs.push({
-              concept: uuids.obs.partner_hivtest_date,
-              value: data["partner_hivtest_date"],
-          });
+        obs.push({
+          concept: uuids.obs.partner_hivtest_date,
+          value: data["partner_hivtest_date"],
+        });
       } else {
-          console.log("Missing partner_hivtest_date!");
+        console.log("Missing partner_hivtest_date!");
       }
       //partner_hivtest_date_missing_id
       if (data["ptrackerpartner_hivtest_date_missing_id"]) {
-          obs.push({
-              concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
-              value: true,
-          });
+        obs.push({
+          concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
+          value: true,
+        });
       } else {
-          console.log("Missing ptrackerpartner_hivtest_date_missing_id!");
+        console.log("Missing ptrackerpartner_hivtest_date_missing_id!");
       }
       //partner_hiv_test_result
       if (data["partner_hiv_test_result"]) {
-          obs.push({
-              concept: uuids.obs.partner_hiv_test_result,
-              value: uuids.odkHivTestResult[data["partner_hiv_test_result"]],
-          });
+        obs.push({
+          concept: uuids.obs.partner_hiv_test_result,
+          value: uuids.odkHivTestResult[data["partner_hiv_test_result"]],
+        });
       } else {
-          obs.push({
-              concept: uuids.obs.partner_hiv_test_result,
-              value: uuids.odkHivTestResult["66"],
-          });
+        obs.push({
+          concept: uuids.obs.partner_hiv_test_result,
+          value: uuids.odkHivTestResult["66"],
+        });
       }
       //art_number_missing
       // if (data["art_number_missing"]) {
@@ -1616,9 +1606,9 @@ async districtMapping(district) {
       //     });
       // }
       return obs;
-  } else {
+    } else {
       return [];
-  }
+    }
   }
 
   getMotherPNCObs(data) {
@@ -1626,14 +1616,14 @@ async districtMapping(district) {
     //pnc
     //next_pnc_visit_date
     if (data["next_pnc_visit_date"]) {
-        obs.push({
-          concept: uuids.obs.next_visit_date,
-          value: data["next_pnc_visit_date"],
-        });
-      } else {
-        console.log("Missing next_pnc_visit_date!");
-      }
-      //next_pnc_visit_facility
+      obs.push({
+        concept: uuids.obs.next_visit_date,
+        value: data["next_pnc_visit_date"],
+      });
+    } else {
+      console.log("Missing next_pnc_visit_date!");
+    }
+    //next_pnc_visit_facility
     if (data["next_pnc_visit_facility"]) {
       obs.push({
         concept: uuids.obs.next_facility_to_visit,
@@ -1645,7 +1635,7 @@ async districtMapping(district) {
         value: uuids.odkNextFacilityToVisit["66"],
       });
     }
-   //next_pnc_visit_facility_transfered
+    //next_pnc_visit_facility_transfered
     if (data["next_pnc_visit_facility_transfered"]) {
       obs.push({
         concept: uuids.obs.next_facility_to_visit_transfered,
@@ -1660,186 +1650,186 @@ async districtMapping(district) {
 
     //--HIV STATUS--
 
-        //hiv_test_status
-        if (data["hiv_test_status"]) {
-            obs.push({
-                concept: uuids.obs.hiv_test_status,
-                value: uuids.odkHIVTestStatus[data["hiv_test_status"]],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.hiv_test_status,
-                value: uuids.odkHIVTestStatus["66"],
-            });
-        }
-        //hiv_test_result
-        if (data["hiv_test_result"]) {
-            obs.push({
-                concept: uuids.obs.hiv_test_result,
-                value: uuids.odkHivTestResult[data["hiv_test_result"].toString()],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.hiv_test_result,
-                value: uuids.odkHivTestResult["66"],
-            });
-        }
-        //art_int_status
-        if (data["art_int_status"]) {
-            obs.push({
-                concept: uuids.obs.art_int_status,
-                value:
-                    uuids.odkARTInitiationStatus[data["art_int_status"].toString()],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.art_int_status,
-                value: uuids.odkARTInitiationStatus["66"],
-            });
-        }
-        //art initiation
-        if (data["art_int_status_refused_reason"]) {
-            obs.push({
-                concept: uuids.obs.art_int_refused_reason,
-                value: data["art_int_status_refused_reason"],
-            });
-        } else {
-            console.log("Missing art_int_status_refused_reason!");
-        }
-        //art_int_status_refused_reason_missing
-        if (data["art_int_status_refused_reason_missing"] == "66") {
-            obs.push({
-                concept: uuids.obs.art_int_status_refused_reason_missing,
-                value: true,
-            });
-        } else {
-            console.log("Missing art_int_status_refused_reason_missing!");
-        }
-        //art_number
-        if (data["art_number"]) {
-            obs.push({
-                concept: uuids.obs.art_number,
-                value: data["art_number"],
-            });
-        } else {
-            if (data["art_number_missing"]) {
-                obs.push({
-                    concept: uuids.obs.art_number_missing,
-                    value: true,
-                });
-            } else {
-                console.log("Missing art_number_missing");
-            }
-        }
-        //art_start_date
-        if (data["art_start_date"]) {
-            obs.push({
-                concept: uuids.obs.art_start_date,
-                value: data["art_start_date"],
-            });
-        } else {
-            console.log("Missing art_start_date!");
-        }
-        //art_start_date_missing
-        if (data["art_start_date_missing"]) {
-            obs.push({
-                concept: uuids.obs.artStartDateMissing,
-                value: true,
-            });
-        } else {
-            console.log("Missing art_start_date_missing!");
-        }
-        //vl_test_done
-        if (data["vl_test_done"]) {
-            obs.push({
-                concept: uuids.obs.vl_test_done,
-                value: uuids.odkVLTestDone[data["vl_test_done"].toString()],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.vl_test_done,
-                value: uuids.odkVLTestDone["66"],
-            });
-        }
-        //vl_test_date
-        if (data["vl_test_date"]) {
-            obs.push({
-                concept: uuids.obs.vl_test_date,
-                value: data["vl_test_date"],
-            });
-        } else {
-            console.log("Missing vl_test_date!");
-        }
-        //vl_test_result
-        if (data["vl_test_result"]) { 
-            if (data["vl_test_result"] == "2") {
-              obs.push({
-                concept: uuids.obs.vl_test_result,
-                value: uuids.odkVLTestResult["0"],
-              });
-            }
-            obs.push({
-              concept: uuids.obs.vl_test_result,
-              value: uuids.odkVLTestResult[data["vl_test_result"].toString()],
-            });
-          } else {
-            obs.push({
-              concept: uuids.obs.vl_test_result,
-              value: uuids.odkVLTestResult["66"],
-            });
-          }
-           //vl_test_result_value
-        if (data["vl_test_result_value"]) {
-            obs.push({
-                concept: uuids.obs.vl_test_result_value,
-                value: data["vl_test_result_value"],
-            });
-        } else {
-            console.log("Missing vl_test_result_value!");
-        }
-         /////////////////////////////////////////////////////
-         //partner_hivtest_done
-        if (data["partner_hivtest_done"]) {
-            obs.push({
-                concept: uuids.obs.partner_hivtest_done,
-                value: uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.partner_hivtest_done,
-                value: uuids.odkHIVTestDone["66"],
-            });
-        }
-        //partner_hivtest_date
-        if (data["partner_hivtest_date"]) {
-            obs.push({
-                concept: uuids.obs.partner_hivtest_date,
-                value: data["partner_hivtest_date"],
-            });
-        } else {
-            console.log("Missing partner_hivtest_date!");
-        }
-        //partner_hivtest_date_missing_id
-        if (data["ptrackerpartner_hivtest_date_missing_id"]) {
-            obs.push({
-                concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
-                value: true,
-            });
-        } else {
-            console.log("Missing ptrackerpartner_hivtest_date_missing_id!");
-        }
-        //partner_hiv_test_result
-        if (data["partner_hiv_test_result"]) {
-            obs.push({
-                concept: uuids.obs.partner_hiv_test_result,
-                value: uuids.odkHivTestResult[data["partner_hiv_test_result"]],
-            });
-        } else {
-            obs.push({
-                concept: uuids.obs.partner_hiv_test_result,
-                value: uuids.odkHivTestResult["66"],
-            });
-        }
+    //hiv_test_status
+    if (data["hiv_test_status"]) {
+      obs.push({
+        concept: uuids.obs.hiv_test_status,
+        value: uuids.odkHIVTestStatus[data["hiv_test_status"]],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.hiv_test_status,
+        value: uuids.odkHIVTestStatus["66"],
+      });
+    }
+    //hiv_test_result
+    if (data["hiv_test_result"]) {
+      obs.push({
+        concept: uuids.obs.hiv_test_result,
+        value: uuids.odkHivTestResult[data["hiv_test_result"].toString()],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.hiv_test_result,
+        value: uuids.odkHivTestResult["66"],
+      });
+    }
+    //art_int_status
+    if (data["art_int_status"]) {
+      obs.push({
+        concept: uuids.obs.art_int_status,
+        value:
+          uuids.odkARTInitiationStatus[data["art_int_status"].toString()],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.art_int_status,
+        value: uuids.odkARTInitiationStatus["66"],
+      });
+    }
+    //art initiation
+    if (data["art_int_status_refused_reason"]) {
+      obs.push({
+        concept: uuids.obs.art_int_refused_reason,
+        value: data["art_int_status_refused_reason"],
+      });
+    } else {
+      console.log("Missing art_int_status_refused_reason!");
+    }
+    //art_int_status_refused_reason_missing
+    if (data["art_int_status_refused_reason_missing"] == "66") {
+      obs.push({
+        concept: uuids.obs.art_int_status_refused_reason_missing,
+        value: true,
+      });
+    } else {
+      console.log("Missing art_int_status_refused_reason_missing!");
+    }
+    //art_number
+    if (data["art_number"]) {
+      obs.push({
+        concept: uuids.obs.art_number,
+        value: data["art_number"],
+      });
+    } else {
+      if (data["art_number_missing"]) {
+        obs.push({
+          concept: uuids.obs.art_number_missing,
+          value: true,
+        });
+      } else {
+        console.log("Missing art_number_missing");
+      }
+    }
+    //art_start_date
+    if (data["art_start_date"]) {
+      obs.push({
+        concept: uuids.obs.art_start_date,
+        value: data["art_start_date"],
+      });
+    } else {
+      console.log("Missing art_start_date!");
+    }
+    //art_start_date_missing
+    if (data["art_start_date_missing"]) {
+      obs.push({
+        concept: uuids.obs.artStartDateMissing,
+        value: true,
+      });
+    } else {
+      console.log("Missing art_start_date_missing!");
+    }
+    //vl_test_done
+    if (data["vl_test_done"]) {
+      obs.push({
+        concept: uuids.obs.vl_test_done,
+        value: uuids.odkVLTestDone[data["vl_test_done"].toString()],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.vl_test_done,
+        value: uuids.odkVLTestDone["66"],
+      });
+    }
+    //vl_test_date
+    if (data["vl_test_date"]) {
+      obs.push({
+        concept: uuids.obs.vl_test_date,
+        value: data["vl_test_date"],
+      });
+    } else {
+      console.log("Missing vl_test_date!");
+    }
+    //vl_test_result
+    if (data["vl_test_result"]) {
+      if (data["vl_test_result"] == "2") {
+        obs.push({
+          concept: uuids.obs.vl_test_result,
+          value: uuids.odkVLTestResult["0"],
+        });
+      }
+      obs.push({
+        concept: uuids.obs.vl_test_result,
+        value: uuids.odkVLTestResult[data["vl_test_result"].toString()],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.vl_test_result,
+        value: uuids.odkVLTestResult["66"],
+      });
+    }
+    //vl_test_result_value
+    if (data["vl_test_result_value"]) {
+      obs.push({
+        concept: uuids.obs.vl_test_result_value,
+        value: data["vl_test_result_value"],
+      });
+    } else {
+      console.log("Missing vl_test_result_value!");
+    }
+    /////////////////////////////////////////////////////
+    //partner_hivtest_done
+    if (data["partner_hivtest_done"]) {
+      obs.push({
+        concept: uuids.obs.partner_hivtest_done,
+        value: uuids.odkHIVTestDone[data["partner_hivtest_done"].toString()],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.partner_hivtest_done,
+        value: uuids.odkHIVTestDone["66"],
+      });
+    }
+    //partner_hivtest_date
+    if (data["partner_hivtest_date"]) {
+      obs.push({
+        concept: uuids.obs.partner_hivtest_date,
+        value: data["partner_hivtest_date"],
+      });
+    } else {
+      console.log("Missing partner_hivtest_date!");
+    }
+    //partner_hivtest_date_missing_id
+    if (data["ptrackerpartner_hivtest_date_missing_id"]) {
+      obs.push({
+        concept: uuids.obs.ptrackerpartner_hivtest_date_missing_id,
+        value: true,
+      });
+    } else {
+      console.log("Missing ptrackerpartner_hivtest_date_missing_id!");
+    }
+    //partner_hiv_test_result
+    if (data["partner_hiv_test_result"]) {
+      obs.push({
+        concept: uuids.obs.partner_hiv_test_result,
+        value: uuids.odkHivTestResult[data["partner_hiv_test_result"]],
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.partner_hiv_test_result,
+        value: uuids.odkHivTestResult["66"],
+      });
+    }
     return obs;
   }
 
@@ -1998,7 +1988,7 @@ async districtMapping(district) {
     if (data["infant_event_date_missing"]) {
       obs.push({
         concept: uuids.obs.infant_event_date_missing,
-        value:true,
+        value: true,
       });
     } else {
       console.log("Missing infant_event_date_missing");
@@ -2007,7 +1997,7 @@ async districtMapping(district) {
     if (data["infant_transferto_artclinic_date"]) {
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic_date,
-        value:true,
+        value: true,
       });
     } else {
       console.log("Missing infant_transferto_artclinic_date");
@@ -2016,7 +2006,7 @@ async districtMapping(district) {
     if (data["infant_transferto_artclinic_date_missing"]) {
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic_date_missing,
-        value:true,
+        value: true,
       });
     } else {
       console.log("Missing infant_transferto_artclinic_date_missing");
@@ -2034,7 +2024,7 @@ async districtMapping(district) {
     if (data["infant_transferto_artclinic_missing"]) {
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic_missing,
-        value:true,
+        value: true,
       });
     } else {
       console.log("Missing infant_transferto_artclinic_missing");
@@ -2078,7 +2068,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing infant_transferin_date");
     }
-  
+
     //infant_transferin_date_missing
     if (data["infant_transferin_date_missing"]) {
       obs.push({
@@ -2154,7 +2144,7 @@ async districtMapping(district) {
         value: uuids.odkYesNoMissing["66"],
       });
     }
-  //art_number
+    //art_number
     if (data["art_number"]) {
       obs.push({
         concept: uuids.obs.art_number,
@@ -2170,35 +2160,35 @@ async districtMapping(district) {
         console.log("Missing art_number_missing");
       }
     }
-      //art_number_missing
-      if (data["art_number_missing"]) {
-        obs.push({
-          concept: uuids.obs.art_number_missing,
-          value: 1,
-        });
-      } else {
-        obs.push({
-          concept: uuids.obs.art_number_missing,
-          value: 0,
-        });
-      }
-      //infant_date_death
-      if (data["infant_date_death"]) {
+    //art_number_missing
+    if (data["art_number_missing"]) {
+      obs.push({
+        concept: uuids.obs.art_number_missing,
+        value: 1,
+      });
+    } else {
+      obs.push({
+        concept: uuids.obs.art_number_missing,
+        value: 0,
+      });
+    }
+    //infant_date_death
+    if (data["infant_date_death"]) {
+      obs.push({
+        concept: uuids.obs.infant_dod,
+        value: data["infant_date_death"],
+      });
+    } else {
+      if (data["infant_date_death_mising"]) {
         obs.push({
           concept: uuids.obs.infant_dod,
-          value: data["infant_date_death"],
+          value: data["infant_date_death_mising"],
         });
       } else {
-        if (data["infant_date_death_mising"]) {
-          obs.push({
-            concept: uuids.obs.infant_dod,
-            value: data["infant_date_death_mising"],
-          });
-        } else {
-          console.log("Missing infant_date_death_mising");
-        }
+        console.log("Missing infant_date_death_mising");
       }
-      //////////////////////////////////////////
+    }
+    //////////////////////////////////////////
     if (data["hiv_exposure_status"]) {
       obs.push({
         concept: uuids.obs.hiv_exposure_status,
@@ -2218,7 +2208,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing next_pnc_visit_facility_transfered");
     }
-  
+
     if (data["hiv_test_status"]) {
       if (data["hiv_test_status"] == "1") {
         obs.push({
@@ -2238,7 +2228,7 @@ async districtMapping(district) {
         value: uuids.odkHIVTestStatus["66"],
       });
     }
-  
+
     if (data["next_pnc_visit_date"]) {
       obs.push({
         concept: uuids.obs.next_visit_date,
@@ -2247,7 +2237,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing next_pnc_visit_date");
     }
-  
+
     if (data["next_visit_date_missing"]) {
       obs.push({
         concept: uuids.obs.next_visit_date_missing,
@@ -2264,7 +2254,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing art_int_status_refused_reason!");
     }
-  
+
     if (data["art_int_status_refused_reason_missing"] == "66") {
       obs.push({
         concept: uuids.obs.art_int_status_refused_reason_missing,
@@ -2273,7 +2263,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing art_int_status_refused_reason_missing!");
     }
-  
+
     if (data["art_int_status"]) {
       obs.push({
         concept: uuids.obs.art_int_status,
@@ -2285,8 +2275,8 @@ async districtMapping(district) {
         value: uuids.odkARTInitiationStatus["66"],
       });
     }
-  
-  
+
+
     if (data["art_start_date"]) {
       obs.push({
         concept: uuids.obs.art_start_date,
@@ -2295,7 +2285,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing art_start_date!");
     }
-  
+
     if (data["art_start_date_missing"]) {
       obs.push({
         concept: uuids.obs.artStartDateMissing,
@@ -2304,7 +2294,7 @@ async districtMapping(district) {
     } else {
       console.log("Missing art_start_date_missing!");
     }
-  
+
     if (data["hiv_test_result"]) {
       obs.push({
         concept: uuids.obs.hiv_test_result,
@@ -2316,7 +2306,7 @@ async districtMapping(district) {
         value: uuids.odkHivTestResult["66"],
       });
     }
-  
+
     if (data["hiv_test_status"]) {
       obs.push({
         concept: uuids.obs.hiv_test_status,
@@ -2328,7 +2318,7 @@ async districtMapping(district) {
         value: uuids.odkHIVTestStatus["66"],
       });
     }
-  
+
     if (data["vl_test_done"]) {
       obs.push({
         concept: uuids.obs.vl_test_done,
@@ -2340,7 +2330,7 @@ async districtMapping(district) {
         value: uuids.odkVLTestDone["66"],
       });
     }
-  
+
     if (data["vl_test_result"]) {
       if (data["vl_test_result"] == "2") {
         obs.push({
@@ -2447,7 +2437,7 @@ async districtMapping(district) {
         concept: uuids.obs.anc_gravida,
         value: data["anc_gravida"],
       });
-    }else {
+    } else {
       console.log("anc_gravida");
     }
 
@@ -2631,7 +2621,7 @@ async districtMapping(district) {
   getInfantObs(ptrackerID, obsDatetime, encounter) {
     return new Promise((resolve, reject) => {
       console.log("**********************************")
-      console.log("12::",encounter.uuid)
+      console.log("12::", encounter.uuid)
       odkCentralStagingData
         .getInfants(stag_odk_delivery_infant, ptrackerID)
         .then((infants) => {
