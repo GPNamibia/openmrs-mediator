@@ -978,7 +978,7 @@ class OpenMrsAPI {
     if (district in districts.Districts) {
       return districts.Districts[district];
     }
-    return "Unknown district specified.";
+    return "";
 
   }
   //Create patient
