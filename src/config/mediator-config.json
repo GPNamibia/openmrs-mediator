@@ -6,11 +6,11 @@
     "defaultChannelConfig": [
         {
             "name": "OpenMRS Mediator",
-            "urlPattern": "^/ptracker_openmrs_mediator$",
+            "urlPattern": "^/ptracker-openmrs-mediator$",
             "routes": [
                 {
                     "name": "OpenMRS Mediator Route",
-                    "host": "ptracker_openmrs_mediator",
+                    "host": "ptracker-openmrs-mediator",
                     "path": "/",
                     "port": "3000",
                     "primary": true,
@@ -30,7 +30,7 @@
     "endpoints": [
         {
             "name": "OpenMRS Mediator Endpoint",
-            "host": "ptracker_odk_central_mediator",
+            "host": "ptracker-odk_central-mediator",
             "path": "/",
             "port": "3000",
             "primary": false,
