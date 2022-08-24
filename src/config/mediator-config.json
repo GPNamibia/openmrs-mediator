@@ -30,7 +30,7 @@
     "endpoints": [
         {
             "name": "OpenMRS Mediator Endpoint",
-            "host": "ptracker-odk_central-mediator",
+            "host": "ptracker-odk-central-mediator",
             "path": "/",
             "port": "3000",
             "primary": false,
