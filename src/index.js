@@ -7,7 +7,7 @@ const pushData = require('./openmrs/pushODKData.js')
 const { getQueryParameters } = require('./openhim/initialize');
 
 //openHIM
-getQueryParameters();
+//getQueryParameters();
 
 app.all('*', async (req, res) => {
   // Starts when a new request is triggered by the polling channel
@@ -23,7 +23,6 @@ app.all('*', async (req, res) => {
     }
   }) 
 });
-
 
 
 //Server PORT
