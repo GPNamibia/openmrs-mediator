@@ -2,6 +2,7 @@ const request = require("request");
 const privateConfig = require("../config/private-config.json");
 const uuids = require("../config/uuid-dictionary.json");
 const districts = require("../config/districts.json");
+const flists = require("../config/flist.json");
 const countries = require("../config/countries.json");
 const facilities = require("../config/mflCodes.json");
 const odkCentralStagingData = require("./getODKCentralData");
@@ -749,7 +750,7 @@ class OpenMrsAPI {
       this.getPatientUsingId(parentPtrackerId).then((parent) => {
         let results = JSON.parse(parent.body)["results"];
         console.log(results);
-        if (results && results.length > 0) {
+        if (results && results.length > 0 && currentPatient.body.uuid) {
           let body = {
             relationshipType: uuids.relationshipType.parentToChild,
             personA: results[0].uuid,
@@ -981,6 +982,14 @@ class OpenMrsAPI {
     return "";
 
   }
+    //flist maping
+    async flistMapping(flist) {
+      if (flist in flists.Flist) {
+        return flists.Flist[flist];
+      }
+      return "";
+  
+    }
   //Create patient
   async createPatient(data, locationUUID) {
     var country = await this.countryMapping(data["country"]);
@@ -1997,7 +2006,7 @@ class OpenMrsAPI {
     if (data["infant_transferto_artclinic_date"]) {
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic_date,
-        value: true,
+        value:data["infant_transferto_artclinic_date"],
       });
     } else {
       console.log("Missing infant_transferto_artclinic_date");
@@ -2013,10 +2022,14 @@ class OpenMrsAPI {
     }
     //infant_transferto_artclinic
     if (data["infant_transferto_artclinic"]) {
+    this.flistMapping(data["infant_transferto_artclinic"]).
+    then((transferTo)=>{
+      console.log(transferTo)
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic,
-        value: data["infant_transferto_artclinic"],
+        value: transferTo,
       });
+    })
     } else {
       console.log("Missing infant_transferto_artclinic");
     }
