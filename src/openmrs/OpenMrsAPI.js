@@ -54,6 +54,13 @@ class OpenMrsAPI {
               console.log(
                 `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
               );
+              if(ancData.art_number){
+                this.asssiggnArtNumber(ancEncounter.body.patient.uuid,ancData.art_number).then((res)=>{
+                  console.log(res)
+                }).catch((error) => {
+                  console.log(error);
+                });
+              }
               //update openmrs status
               odkCentralStagingData
                 .updateOpenmrsStatus(
@@ -109,6 +116,13 @@ class OpenMrsAPI {
               console.log(
                 `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
               );
+              if(ancData.art_number){
+                this.asssiggnArtNumber(ancEncounter.body.patient.uuid,ancData.art_number).then((res)=>{
+                  console.log(res)
+                }).catch((error) => {
+                  console.log(error);
+                });
+              }
               //update openmrs status
               odkCentralStagingData
                 .updateOpenmrsStatus(
@@ -210,6 +224,13 @@ class OpenMrsAPI {
                 .then(async (deliveryEncounter) => {
                   console.log("***************************** Creating Delivery Encounter ***************");
                   let encounter = deliveryEncounter.body;
+                  if(deliveryData.art_number){
+                    this.asssiggnArtNumber(encounter.uuid,deliveryData.art_number).then((res)=>{
+                      console.log(res)
+                    }).catch((error) => {
+                      console.log(error);
+                    });
+                  }
                   console.log("***************************** Creating Infant Person ***************");
                   //Creating infant person
                   await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
@@ -333,6 +354,13 @@ class OpenMrsAPI {
                     "***************************** Creating Delivery Encounter ***************"
                   );
                   let encounter = deliveryEncounter.body;
+                  if(deliveryData.art_number){
+                    this.asssiggnArtNumber(encounter.uuid,deliveryData.art_number).then((res)=>{
+                      console.log(res)
+                    }).catch((error) => {
+                      console.log(error);
+                    });
+                  }
                   // console.log(encounter);
                   console.log(
                     "***************************** Creating Infant Person ***************"
@@ -482,6 +510,13 @@ class OpenMrsAPI {
                 console.log(
                   `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
                 );
+                if(pncData.art_number){
+                  this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid,pncData.art_number).then((res)=>{
+                    console.log(res)
+                  }).catch((error) => {
+                    console.log(error);
+                  });
+                }
                 // return resolve(ancEncounter);
                 //update openmrs status
                 odkCentralStagingData
@@ -539,6 +574,13 @@ class OpenMrsAPI {
                 console.log(
                   `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
                 );
+                if(pncData.art_number){
+                  this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid,pncData.art_number).then((res)=>{
+                    console.log(res)
+                  }).catch((error) => {
+                    console.log(error);
+                  });
+                }
                 // return resolve(ancEncounter);
                 //update openmrs status
                 odkCentralStagingData
@@ -613,6 +655,13 @@ class OpenMrsAPI {
                 console.log(
                   `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
                 );
+                if(pncData.art_number){
+                  this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid,pncData.art_number).then((res)=>{
+                    console.log(res)
+                  }).catch((error) => {
+                    console.log(error);
+                  });
+                }
                 // return resolve(ancEncounter);
                 //update openmrs status
                 odkCentralStagingData
@@ -670,6 +719,13 @@ class OpenMrsAPI {
                 console.log(
                   `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
                 );
+                if(pncData.art_number){
+                  this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid,pncData.art_number).then((res)=>{
+                    console.log(res)
+                  }).catch((error) => {
+                    console.log(error);
+                  });
+                }
                 // return resolve(ancEncounter);
                 //Creating relationship infant-parent
                 if (pncData["parent_ptracker_id"]) {
@@ -822,6 +878,28 @@ class OpenMrsAPI {
     let options = {
       method: "POST",
       url: privateConfig.openmrsConfig.apiURL + `encounter`,
+      qs: {},
+      headers: privateConfig.openmrsConfig.headers,
+      form: false,
+      auth: {
+        user: privateConfig.openmrsConfig.username,
+        pass: privateConfig.openmrsConfig.password,
+      },
+      json: true,
+      body: body,
+    };
+    return this.sendRequest(options);
+  }
+
+  async asssiggnArtNumber(uuid,artNumber) {
+    console.log("*******************Assigning ART Number*********************");
+    let body = {
+      identifier:artNumber,
+      identifierType:uuids.obs.artIdentifierType
+    };
+    let options = {
+      method: "POST",
+      url: privateConfig.openmrsConfig.apiURL + `patient/${uuid}/identifier`,
       qs: {},
       headers: privateConfig.openmrsConfig.headers,
       form: false,
@@ -2012,12 +2090,10 @@ class OpenMrsAPI {
     //infant_transferto_artclinic
     if (data["infant_transferto_artclinic"]) {
       var next_facility_to_visit=await this.flistMapping(data["infant_transferto_artclinic"]);
-    then((transferTo)=>{
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic,
         value: next_facility_to_visit,
       });
-    })
     } else {
       console.log("Missing infant_transferto_artclinic");
     }
