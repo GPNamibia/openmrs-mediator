@@ -104,7 +104,8 @@
     "infant_hiv_test_conf_result": "140497BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
     "infant_art_linked": "a40d8bc4-56b8-4f28-a1dd-412da5cf20ed",
     "arv_prophylaxis_adherence": "1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-    "art_number": "164402AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    "art_number": "164402AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "artIdentifierType":"9d6d1eec-2cd6-4637-a981-4a46b4b8b41f"
   },
   "kin_attributes": {
     "odk_kin_name": "dc0cf7a8-dede-4c3d-9db4-730900aedd1a",
