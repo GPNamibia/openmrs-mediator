@@ -2,6 +2,7 @@ const request = require("request");
 const privateConfig = require("../config/private-config.json");
 const uuids = require("../config/uuid-dictionary.json");
 const districts = require("../config/districts.json");
+const flists = require("../config/flist.json");
 const countries = require("../config/countries.json");
 const facilities = require("../config/mflCodes.json");
 const odkCentralStagingData = require("./getODKCentralData");
@@ -45,7 +46,7 @@ class OpenMrsAPI {
         if (patientRecord.length > 0) {
           console.log("**************Patient found********** ");
           currentPatient = patientRecord[0];
-          this.createANCEncounter(currentPatient, ancData, locationUUID)
+          await this.createANCEncounter(currentPatient, ancData, locationUUID)
             .then((ancEncounter) => {
               console.log(
                 "***************************** Creating ANC Encounter ***************"
@@ -100,7 +101,7 @@ class OpenMrsAPI {
           let newPatient = await this.createPatient(ancData, locationUUID);
           let patientBody = newPatient.body;
           console.log(`Patient UUID ${patientBody.uuid}`);
-          this.createANCEncounter(patientBody, ancData, locationUUID)
+          await this.createANCEncounter(patientBody, ancData, locationUUID)
             .then((ancEncounter) => {
               console.log(
                 "***************************** Creating ANC Encounter ***************"
@@ -473,7 +474,7 @@ class OpenMrsAPI {
             console.log("**************Patient found********** ");
             currentPatient = patientRecord[0];
             //creating encounter
-            this.createMotherPNCEncounter(currentPatient, pncData, locationUUID)
+            await this.createMotherPNCEncounter(currentPatient, pncData, locationUUID)
               .then((pncMotherEncounter) => {
                 console.log(
                   "***************************** Creating PNC Mother Encounter ***************"
@@ -530,7 +531,7 @@ class OpenMrsAPI {
             let patientBody = patient.body;
             console.log(`Patient UUID ${patientBody.uuid}`);
             //creating encounter
-            this.createMotherPNCEncounter(patientBody, pncData, locationUUID)
+            await this.createMotherPNCEncounter(patientBody, pncData, locationUUID)
               .then((pncMotherEncounter) => {
                 console.log(
                   "***************************** Creating PNC Mother Encounter ***************"
@@ -603,7 +604,7 @@ class OpenMrsAPI {
             );
             currentPatient = patientRecord[0];
             //creating encounter
-            this.createInfantPNCEncounter(currentPatient, pncData, locationUUID)
+            await this.createInfantPNCEncounter(currentPatient, pncData, locationUUID)
               .then((pncInfantEncounter) => {
                 console.log(
                   "***************************** Creating PNC Infant Encounter ***************"
@@ -613,19 +614,6 @@ class OpenMrsAPI {
                   `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
                 );
                 // return resolve(ancEncounter);
-                //Creating relationship infant-parent
-                if (pncData["parent_ptracker_id"]) {
-                  console.log("**********************linking mother to child**********************");
-                  this.createRelationShip(currentPatient, pncData["parent_ptracker_id"])
-                    .then((patientLink) => {
-                      console.log(patientLink)
-                      console.log(
-                        "****************linked mother to child**********************"
-                      );
-                    }).catch((error) => {
-                      console.error(`Error linking infant to parent: ${error} 🚫`);
-                    });
-                }
                 //update openmrs status
                 odkCentralStagingData
                   .updateOpenmrsStatus(
@@ -674,7 +662,7 @@ class OpenMrsAPI {
             let patientBody = newPatient.body;
             console.log(`Patient UUID ${patientBody.uuid}`);
             //creating encounter
-            this.createInfantPNCEncounter(patientBody, pncData, locationUUID)
+            await this.createInfantPNCEncounter(patientBody, pncData, locationUUID)
               .then((pncInfantEncounter) => {
                 console.log(
                   "***************************** Creating PNC Infant Encounter ***************"
@@ -749,7 +737,7 @@ class OpenMrsAPI {
       this.getPatientUsingId(parentPtrackerId).then((parent) => {
         let results = JSON.parse(parent.body)["results"];
         console.log(results);
-        if (results && results.length > 0) {
+        if (results && results.length > 0 && currentPatient.body.uuid) {
           let body = {
             relationshipType: uuids.relationshipType.parentToChild,
             personA: results[0].uuid,
@@ -811,9 +799,9 @@ class OpenMrsAPI {
   }
 
 
-  createANCEncounter(newPatient, ancData, locationUUID) {
+  async createANCEncounter(newPatient, ancData, locationUUID) {
     console.log("*******************PRINTING ANC obs*********************");
-    let obs = this.getObs(ancData);
+    let obs = await this.getObs(ancData);
     console.log(obs);
     console.log("*******************fetching ANC obs*********************");
 
@@ -847,8 +835,8 @@ class OpenMrsAPI {
     return this.sendRequest(options);
   }
 
-  createMotherPNCEncounter(newPatient, motherPncData, locationUUID) {
-    let obs = this.getMotherPNCObs(motherPncData);
+  async createMotherPNCEncounter(newPatient, motherPncData, locationUUID) {
+    let obs = await this.getMotherPNCObs(motherPncData);
     console.log("*******************obs*********************");
     console.log(obs);
     let body = {
@@ -881,8 +869,8 @@ class OpenMrsAPI {
     return this.sendRequest(options);
   }
 
-  createInfantPNCEncounter(newPatient, infantPncData, locationUUID) {
-    let obs = this.getInfantPNCObs(infantPncData);
+  async createInfantPNCEncounter(newPatient, infantPncData, locationUUID) {
+    let obs = await this.getInfantPNCObs(infantPncData);
     console.log("*******************obs*********************");
     console.log(obs);
 
@@ -981,6 +969,14 @@ class OpenMrsAPI {
     return "";
 
   }
+    //flist maping
+    async flistMapping(flist) {
+      if (flist in flists.Flist) {
+        return flists.Flist[flist];
+      }
+      return "";
+  
+    }
   //Create patient
   async createPatient(data, locationUUID) {
     var country = await this.countryMapping(data["country"]);
@@ -1282,7 +1278,7 @@ class OpenMrsAPI {
     return this.sendRequest(options);
   }
 
-  getObs(data) {
+  async getObs(data) {
     if (data) {
       let obs = [];
       // --ANC--
@@ -1379,9 +1375,10 @@ class OpenMrsAPI {
       }
       //next_facility_to_visit_transfered
       if (data["next_facility_to_visit_transfered"]) {
+        var next_facility_to_visit=await this.flistMapping(data["next_facility_to_visit_transfered"]);
         obs.push({
           concept: uuids.obs.next_facility_to_visit_transfered,
-          value: data["next_facility_to_visit_transfered"],
+          value: next_facility_to_visit,
         });
       } else {
         console.log("Missing next_facility_to_visit_transfered!");
@@ -1611,7 +1608,7 @@ class OpenMrsAPI {
     }
   }
 
-  getMotherPNCObs(data) {
+  async getMotherPNCObs(data) {
     let obs = [];
     //pnc
     //next_pnc_visit_date
@@ -1636,10 +1633,11 @@ class OpenMrsAPI {
       });
     }
     //next_pnc_visit_facility_transfered
-    if (data["next_pnc_visit_facility_transfered"]) {
+    if ((data["next_pnc_visit_facility_transfered"])) {
+      var next_facility_to_visit=await this.flistMapping(data["next_pnc_visit_facility_transfered"]);
       obs.push({
         concept: uuids.obs.next_facility_to_visit_transfered,
-        value: data["next_pnc_visit_facility_transfered"],
+        value: next_facility_to_visit,
       });
     } else {
       console.log("Missing next_pnc_visit_facility_transfered!");
@@ -1833,7 +1831,7 @@ class OpenMrsAPI {
     return obs;
   }
 
-  getInfantPNCObs(data) {
+  async getInfantPNCObs(data) {
     let obs = [];
     //infant pnc
     //arv_prophylaxis_status
@@ -1997,7 +1995,7 @@ class OpenMrsAPI {
     if (data["infant_transferto_artclinic_date"]) {
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic_date,
-        value: true,
+        value:data["infant_transferto_artclinic_date"],
       });
     } else {
       console.log("Missing infant_transferto_artclinic_date");
@@ -2013,10 +2011,13 @@ class OpenMrsAPI {
     }
     //infant_transferto_artclinic
     if (data["infant_transferto_artclinic"]) {
+      var next_facility_to_visit=await this.flistMapping(data["infant_transferto_artclinic"]);
+    then((transferTo)=>{
       obs.push({
         concept: uuids.obs.infant_transferto_artclinic,
-        value: data["infant_transferto_artclinic"],
+        value: next_facility_to_visit,
       });
+    })
     } else {
       console.log("Missing infant_transferto_artclinic");
     }
@@ -2200,15 +2201,6 @@ class OpenMrsAPI {
         value: uuids.odkHIVExposureStatus["66"],
       });
     }
-    if (data["next_pnc_visit_facility_transfered"]) {
-      obs.push({
-        concept: uuids.obs.next_facility_to_visit_transfered,
-        value: data["next_pnc_visit_facility_transfered"],
-      });
-    } else {
-      console.log("Missing next_pnc_visit_facility_transfered");
-    }
-
     if (data["hiv_test_status"]) {
       if (data["hiv_test_status"] == "1") {
         obs.push({
