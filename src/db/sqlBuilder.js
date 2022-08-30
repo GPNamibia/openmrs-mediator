@@ -4,6 +4,7 @@ const Op = Sequelize.Op;
 
 async function readData(model) {
   const foundItems = await model.findAll({
+    limit: 10 ,
     where: {
       openmrs_status: {
         [Op.or]: {
@@ -67,6 +68,7 @@ async function updateOpenmrsErrorMessageLD(model, infant_id, error) {
 
 async function getInfants(model, ptrackerId) {
   infants = model.findAll({
+    limit: 10 ,
     where: {
       openmrs_status: {
         [Op.or]: {
