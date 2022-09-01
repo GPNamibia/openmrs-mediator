@@ -6,12 +6,7 @@ async function readData(model) {
   const foundItems = await model.findAll({
     limit: 10 ,
     where: {
-      openmrs_status: {
-        [Op.or]: {
-          [Op.not]: "sent",
-          [Op.eq]: null,
-        },
-      },
+      [Op.or]: [{openmrs_status: null}, {openmrs_status: "pending"}]
     },
   });
   return foundItems;
@@ -70,12 +65,7 @@ async function getInfants(model, ptrackerId) {
   infants = model.findAll({
     limit: 10 ,
     where: {
-      openmrs_status: {
-        [Op.or]: {
-          [Op.not]: "created",
-          [Op.eq]: null,
-        },
-      },
+      [Op.or]: [{openmrs_status: null}, {openmrs_status: "created"}],
       [Op.and]: { ptracker_id: ptrackerId },
     },
   });
