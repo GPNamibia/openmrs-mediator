@@ -51,6 +51,7 @@ class OpenMrsAPI {
               console.log(
                 "***************************** Creating ANC Encounter ***************"
               );
+              console.log(ancEncounter);
               console.log(
                 `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
               );
@@ -113,6 +114,7 @@ class OpenMrsAPI {
               console.log(
                 "***************************** Creating ANC Encounter ***************"
               );
+              console.log(ancEncounter);
               console.log(
                 `Encounter successfully created for patient uuid = ${ancEncounter.body.patient.uuid}`
               );
@@ -1602,9 +1604,10 @@ class OpenMrsAPI {
       }
       //vl_test_result_value
       if (data["vl_test_result_value"]) {
+        var vl_copies=Math.round(data["vl_test_result_value"]);
         obs.push({
           concept: uuids.obs.vl_test_result_value,
-          value: data["vl_test_result_value"],
+          value: vl_copies,
         });
       } else {
         console.log("Missing vl_test_result_value!");
@@ -1856,9 +1859,10 @@ class OpenMrsAPI {
     }
     //vl_test_result_value
     if (data["vl_test_result_value"]) {
+      var vl_copies=Math.round(data["vl_test_result_value"]);
       obs.push({
         concept: uuids.obs.vl_test_result_value,
-        value: data["vl_test_result_value"],
+        value: vl_copies,
       });
     } else {
       console.log("Missing vl_test_result_value!");
@@ -2663,6 +2667,17 @@ class OpenMrsAPI {
         concept: uuids.obs.vl_test_done,
         value: uuids.odkVLTestDone["66"],
       });
+    }
+
+    //vl_test_result_value
+    if (data["vl_test_result_value"]) {
+      var vl_copies=Math.round(data["vl_test_result_value"]);
+      obs.push({
+        concept: uuids.obs.vl_test_result_value,
+        value: vl_copies,
+      });
+    } else {
+      console.log("Missing vl_test_result_value!");
     }
 
     if (data["vl_test_result"]) {
