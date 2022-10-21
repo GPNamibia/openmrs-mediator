@@ -37,5 +37,21 @@
             "type": "http"
         }
     ],
-    "configDefs": []
+    "configDefs": [
+        {
+            "param": "openMrsMediatorParams",
+            "displayName": "openMRS mediator variables",
+            "description": "Variables to define odk central retrieval query",
+            "type": "struct",
+            "array": false,
+            "template": [
+              {
+                "param": "sql_limit_number",
+                "displayName": "SQL Limit",
+                "description": "SQL limit number for odk central",
+                "type": "number"
+              }
+            ]
+          }
+    ]
 }

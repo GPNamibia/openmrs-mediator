@@ -1,18 +1,16 @@
 const flatten = require("flat");
 const sqlBuilder = require("../db/sqlBuilder");
 
-function getSubmissionData(table_name) {
-  return new Promise((resolve, reject) => {
-    sqlBuilder
-      .readData(table_name)
-      .then((res) => {
-        return resolve(res);
-      })
-      .catch((error) => {
-        return reject(
-          `Error while retrieving Data from ANC staging table: ${error} 🚫\n`
-        );
-      });
+async function getSubmissionData(table_name,sqlLimit) {
+  return new Promise(async (resolve, reject) => {
+    //new records
+    sqlBuilder.readData(table_name,sqlLimit).then(async (res) => {
+      return resolve(res);
+    });
+    //pending records
+     sqlBuilder.readPendingData(table_name).then((res) => {
+      return resolve(res);
+    })
   });
 }
 
@@ -77,10 +75,10 @@ function updateOpenmrsErrorMessageLD(tableName, id, error) {
   });
 }
 
-function getInfants(tableName, ptrackerId) {
+function getInfants(tableName, ptrackerId,sqlLimit) {
   return new Promise((resolve, reject) => {
     sqlBuilder
-      .getInfants(tableName, ptrackerId)
+      .getInfants(tableName, ptrackerId,sqlLimit)
       .then((result) => {
         return resolve(result);
       })

@@ -25,7 +25,7 @@ fetchConfig(openhimConfig, (err, initialConfig) => {
         throw new Error(`Failed to fetch initial config. ${err}`)
     }
     console.log('Initial Config: ', JSON.stringify(initialConfig))
-    queryParams = initialConfig.labResultsParams
+    queryParams = initialConfig.openMrsMediatorParams
 });
 
 emitter.on('error', err => {
@@ -34,7 +34,7 @@ emitter.on('error', err => {
 
 emitter.on('config', newConfig => {
     console.log('Received updated config:', JSON.stringify(newConfig))
-    queryParams = newConfig.labResultsParams
+    queryParams = newConfig.openMrsMediatorParams
 });
 
 function getQueryParameters() { return queryParams }

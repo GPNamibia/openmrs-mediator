@@ -10,19 +10,19 @@ const {
 } = require("../../src/models");
 const { resolve } = require("path");
 
-async function pushODKData() {
+async function pushODKData(sqlLimit) {
   return new Promise(async (resolve, reject) => {
-    let anc = await pushANC();
-    let labor_and_delivery = await pushLabourAndDelivery();
-    let motherPNC = await pushMotherPNC();
-    let pncInfant = await pushInfantPNC();
+    let anc = await pushANC(sqlLimit);
+    let labor_and_delivery = await pushLabourAndDelivery(sqlLimit);
+    let motherPNC = await pushMotherPNC(sqlLimit);
+    let pncInfant = await pushInfantPNC(sqlLimit);
     return resolve();
   });
 }
 
-async function pushANC() {
+async function pushANC(sqlLimit) {
   odkCentralStagingData
-    .getSubmissionData(stag_odk_anc)
+    .getSubmissionData(stag_odk_anc,sqlLimit)
     .then((res) => {
       return new Promise((resolve, reject) => {
         if (res.length < 1) {
@@ -53,8 +53,8 @@ async function pushANC() {
     });
 }
 
-async function pushLabourAndDelivery() {
-  odkCentralStagingData.getSubmissionData(stag_odk_delivery).then((res) => {
+async function pushLabourAndDelivery(sqlLimit) {
+  odkCentralStagingData.getSubmissionData(stag_odk_delivery,sqlLimit).then((res) => {
     return new Promise((resolve, reject) => {
       if (res.length < 1) {
         console.log(
@@ -68,7 +68,7 @@ async function pushLabourAndDelivery() {
 
         //Infant data
         odkCentralStagingData
-          .getInfants(stag_odk_delivery_infant, result.ptracker_id)
+          .getInfants(stag_odk_delivery_infant, result.ptracker_id,sqlLimit)
           .then((res) => {
             return new Promise((resolve, reject) => {
               res.forEach((response) => {
@@ -93,9 +93,9 @@ async function pushLabourAndDelivery() {
   });
 }
 
-async function pushMotherPNC() {
+async function pushMotherPNC(sqlLimit) {
   odkCentralStagingData
-    .getSubmissionData(stag_odk_pnc_mother)
+    .getSubmissionData(stag_odk_pnc_mother,sqlLimit)
     .then((res) => {
       return new Promise((resolve, reject) => {
         if (res.length < 1) {
@@ -127,9 +127,9 @@ async function pushMotherPNC() {
     });
 }
 
-async function pushInfantPNC() {
+async function pushInfantPNC(sqlLimit) {
   odkCentralStagingData
-    .getSubmissionData(stag_odk_pnc_infant)
+    .getSubmissionData(stag_odk_pnc_infant,sqlLimit)
     .then((results) => {
       return new Promise((resolve, reject) => {
         if (results.length < 1) {
