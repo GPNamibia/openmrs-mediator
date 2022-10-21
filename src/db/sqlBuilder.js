@@ -1,13 +1,26 @@
 // upsert record into MYSQL
 var Sequelize = require("sequelize");
 const Op = Sequelize.Op;
+const privateConfig = require('../config/private-config.json');
 
-async function readData(model) {
+async function readData(model,sqlLimit) {
   const foundItems = await model.findAll({
-    limit: 10 ,
+    limit: sqlLimit,
     where: {
-      [Op.or]: [{openmrs_status: null}, {openmrs_status: "pending"}]
+      [Op.or]: [{ openmrs_status: null }]
     },
+    order: [['createdAt']]
+  });
+  return foundItems;
+}
+
+async function readPendingData(model) {
+  const foundItems = await model.findAll({
+    limit: privateConfig.appConfig.sqlLimit,
+    where: {
+      [Op.or]: [{ openmrs_status: "pending" }]
+    },
+    order: [['createdAt']]
   });
   return foundItems;
 }
@@ -61,13 +74,14 @@ async function updateOpenmrsErrorMessageLD(model, infant_id, error) {
   }
 }
 
-async function getInfants(model, ptrackerId) {
+async function getInfants(model, ptrackerId,sqlLimit) {
   infants = model.findAll({
-    limit: 10 ,
+    limit: sqlLimit,
     where: {
-      [Op.or]: [{openmrs_status: null}, {openmrs_status: "created"}],
+      [Op.or]: [{ openmrs_status: null }, { openmrs_status: "created" }],
       [Op.and]: { ptracker_id: ptrackerId },
     },
+    order: [['createdAt']]
   });
   return infants;
 }
@@ -79,4 +93,5 @@ module.exports = {
   updateOpenmrsErrorMessage,
   updateOpenMRSStatusLD,
   updateOpenmrsErrorMessageLD,
+  readPendingData
 };
