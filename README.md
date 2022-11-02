@@ -1,5 +1,6 @@
-# openMRS Mediator
-This mediator is intended to send api request to openmrs server
+
+# NodeJS OpenMRS OpenHim Mediator
+This [OpenHIM](https://github.com/jembi/openhim-core-js) Mediator is intended create patients and record encounters stored in a MySQL database table. This mediator is one of two used by Namibia PTracker for records transferred from ODK Central to OpenMRS. 
 
 # Private Configurations
 The `private-config.json` is used to store all the credentials and connection URLs of the mediator. The credentials are currently left out, so the file needs to be renamed with all the required credentials and URLs before installation for the mediator to work.
