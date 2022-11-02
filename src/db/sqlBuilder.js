@@ -14,9 +14,9 @@ async function readData(model,sqlLimit) {
   return foundItems;
 }
 
-async function readPendingData(model) {
+async function readPendingData(model,sqlLimit) {
   const foundItems = await model.findAll({
-    limit: privateConfig.appConfig.sqlLimit,
+    limit: sqlLimit,
     where: {
       [Op.or]: [{ openmrs_status: "pending" }]
     },
