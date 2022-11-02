@@ -8,7 +8,7 @@ async function getSubmissionData(table_name,sqlLimit) {
       return resolve(res);
     });
     //pending records
-     sqlBuilder.readPendingData(table_name).then((res) => {
+     sqlBuilder.readPendingData(table_name,sqlLimit).then((res) => {
       return resolve(res);
     })
   });
