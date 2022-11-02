@@ -6,6 +6,9 @@ const flists = require("../config/flist.json");
 const countries = require("../config/countries.json");
 const facilities = require("../config/mflCodes.json");
 const odkCentralStagingData = require("./getODKCentralData");
+const { ProviderApi } = require("./Provider");
+const provider = new ProviderApi();
+
 
 const {
   stag_odk_anc,
@@ -235,87 +238,233 @@ class OpenMrsAPI {
           console.log(`Facility uuid is :`, facility_uuid);
           this.getLocation(facility_uuid).then(async (location) => {
             console.log(`Location for uuid :${facility_uuid} is :`, location.name);
-              this.checkIfLocationIsVoided(location.body).then(async (res) => {
-                //check retired value from openmrs
-                if (res == false) {
-                  let locationUUID = location.body.uuid;
-                  if (patientRecord.length > 0) {
-                    console.log("**************Patient found********** ");
-                    currentPatient = patientRecord[0];
-                    //Encounter response
-                    let encounterResponse = null;
-                    //Creating delivery encounter
-                    await this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID)
-                      .then(async (deliveryEncounter) => {
-                        //Encounter response
-                        encounterResponse = JSON.stringify(deliveryEncounter.body);
-                        console.log("***************************** Creating Delivery Encounter ***************");
-                        let encounter = deliveryEncounter.body;
-                        if (deliveryData.art_number) {
-                          this.asssiggnArtNumber(encounter.uuid, deliveryData.art_number).then((res) => {
-                            console.log(res)
+            this.checkIfLocationIsVoided(location.body).then(async (res) => {
+              //check retired value from openmrs
+              if (res == false) {
+                let locationUUID = location.body.uuid;
+                if (patientRecord.length > 0) {
+                  console.log("**************Patient found********** ");
+                  currentPatient = patientRecord[0];
+                  //Encounter response
+                  let encounterResponse = null;
+                  //Creating delivery encounter
+                  await this.createDeliveryEncounter(currentPatient, deliveryData, locationUUID)
+                    .then(async (deliveryEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(deliveryEncounter.body);
+                      console.log("***************************** Creating Delivery Encounter ***************");
+                      let encounter = deliveryEncounter.body;
+                      if (deliveryData.art_number) {
+                        this.asssiggnArtNumber(encounter.uuid, deliveryData.art_number).then((res) => {
+                          console.log(res)
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                      }
+                      console.log("***************************** Creating Infant Person ***************");
+                      //Creating infant person
+                      await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
+                        .then(async (infant) => {
+                          // console.log(infant)
+                          console.log(
+                            `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
+                          );
+                          //Creating relationship infant-parent
+                          this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
+                            .then((res) => {
+                              // console.log(res);
+                              console.log(
+                                `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
+                              );
+                            }).catch((err) => {
+                              console.log(
+                                `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
+                              );
+                            });
+                          //update openmrs status
+                          odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
+                            .then((updateResponse) => {
+                              console.log(
+                                `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]} Openmrs status updated successfully  ✅`
+                              );
+                              //update openmrs error table
+                              odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], null);
+                            }).catch((error) => {
+                              console.log(error);
+                            });
+                        }).catch((err) => {
+                          console.log(`Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`);
+                          //update openmrs status
+                          odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
+                            .then((updateResponse) => {
+                              odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
+                              // console.log(`ODK staging record submission_uuid = ${infantDeliveryData["Submissions_uuid"]}) Openmrs status updated successfully  ✅`);
+                              //update openmrs error table
+                              odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${encounterResponse}`);
+                              odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${encounterResponse}`);
+                            }).catch((error) => {
+                              console.log(error);
+                            });
+                        });
+                      console.log(
+                        "*****************************Getting Infant Obs ***************"
+                      );
+                      //Getting infant obs
+                      await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter
+                      ).then(async (infantObs) => {
+                        // console.log(encounter)
+                        //infant instance
+                        infantObs.forEach(async (result, index) => {
+                          await this.infantChildInstance(index).then(async (res) => {
+                            let body = {
+                              obsDatetime: deliveryData["visit_date"],
+                              person: currentPatient.uuid,
+                              groupMembers: result,
+                              encounter: encounter.uuid,
+                              concept: res,
+                            };
+                            let options = {
+                              method: "POST",
+                              url: privateConfig.openmrsConfig.apiURL + `obs`,
+                              qs: {},
+                              headers: privateConfig.openmrsConfig.headers,
+                              form: false,
+                              auth: {
+                                user: privateConfig.openmrsConfig.username,
+                                pass: privateConfig.openmrsConfig.password,
+                              },
+                              json: true,
+                              body: body,
+                            };
+                            return resolve(this.sendRequest(options));
                           }).catch((error) => {
                             console.log(error);
                           });
-                        }
-                        console.log("***************************** Creating Infant Person ***************");
-                        //Creating infant person
-                        await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
-                          .then(async (infant) => {
-                            // console.log(infant)
-                            console.log(
-                              `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
-                            );
-                            //Creating relationship infant-parent
-                            this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
-                              .then((res) => {
-                                // console.log(res);
-                                console.log(
-                                  `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
-                                );
-                              }).catch((err) => {
-                                console.log(
-                                  `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
-                                );
-                              });
-                            //update openmrs status
-                            odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
-                              .then((updateResponse) => {
-                                console.log(
-                                  `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]} Openmrs status updated successfully  ✅`
-                                );
-                                //update openmrs error table
-                                odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], null);
-                              }).catch((error) => {
-                                console.log(error);
-                              });
-                          }).catch((err) => {
-                            console.log(`Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`);
-                            //update openmrs status
-                            odkCentralStagingData.updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
-                              .then((updateResponse) => {
-                                odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
-                                // console.log(`ODK staging record submission_uuid = ${infantDeliveryData["Submissions_uuid"]}) Openmrs status updated successfully  ✅`);
-                                //update openmrs error table
-                                odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${encounterResponse}`);
-                                odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${encounterResponse}`);
-                              }).catch((error) => {
-                                console.log(error);
-                              });
-                          });
-                        console.log(
-                          "*****************************Getting Infant Obs ***************"
-                        );
-                        //Getting infant obs
-                        await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter
-                        ).then(async (infantObs) => {
-                          // console.log(encounter)
-                          //infant instance
+                        });
+                      }).catch((error) => {
+                        console.log(error);
+                      });
+                      console.log(
+                        `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, null);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    }).catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                } else {
+                  console.log("**************Creating new Patient************* ");
+                  let patient = await this.createPatient(deliveryData, locationUUID);
+                  let patientBody = patient.body;
+                  console.log(`Patient UUID ${patientBody.uuid}`);
+                  //Encounter response
+                  let encounterResponse = null;
+                  //Creating delivery encounter
+                  await this.createDeliveryEncounter(patientBody, deliveryData, locationUUID)
+                    .then(async (deliveryEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(deliveryEncounter.body);
+                      console.log(
+                        "***************************** Creating Delivery Encounter ***************"
+                      );
+                      let encounter = deliveryEncounter.body;
+                      if (deliveryData.art_number) {
+                        this.asssiggnArtNumber(encounter.uuid, deliveryData.art_number).then((res) => {
+                          console.log(res)
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                      }
+                      // console.log(encounter);
+                      console.log(
+                        "***************************** Creating Infant Person ***************"
+                      );
+                      //Creating infant person
+                      await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
+                        .then(async (infant) => {
+                          // console.log(infant)
+                          console.log(
+                            `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
+                          );
+                          //Creating relationship infant-parent
+                          this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
+                            .then((res) => {
+                              // console.log(res);
+                              console.log(
+                                `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
+                              );
+                            })
+                            .catch((err) => {
+                              console.log(
+                                `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
+                              );
+                            });
+                          //update openmrs status
+                          odkCentralStagingData
+                            .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
+                            .then((updateResponse) => {
+                              console.log(
+                                `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
+                              );
+                              //update openmrs error table
+                              odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], null);
+                            }).catch((error) => {
+                              console.log(error);
+                            });
+                        }).catch((err) => {
+                          console.log(
+                            `Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`
+                          );
+                          //update openmrs status
+                          odkCentralStagingData
+                            .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
+                            .then((updateResponse) => {
+                              odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
+                              console.log(
+                                `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
+                              );
+                              //update openmrs error table
+                              odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${encounterResponse}`);
+                              odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${encounterResponse}`);
+                            }).catch((error) => {
+                              console.log(error);
+                            });
+                        });
+                      console.log(
+                        "*****************************Getting Infant Obs ***************"
+                      );
+                      await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
+                        .then(async (infantObs) => {
                           infantObs.forEach(async (result, index) => {
+                            //infant instance
                             await this.infantChildInstance(index).then(async (res) => {
                               let body = {
                                 obsDatetime: deliveryData["visit_date"],
-                                person: currentPatient.uuid,
+                                person: patientBody.uuid,
                                 groupMembers: result,
                                 encounter: encounter.uuid,
                                 concept: res,
@@ -341,192 +490,46 @@ class OpenMrsAPI {
                         }).catch((error) => {
                           console.log(error);
                         });
-                        console.log(
-                          `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
-                        );
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                            );
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, null);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      }).catch((err) => {
-                        console.log(
-                          `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
-                        );
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                            );
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      });
-                  } else {
-                    console.log("**************Creating new Patient************* ");
-                    let patient = await this.createPatient(deliveryData, locationUUID);
-                    let patientBody = patient.body;
-                    console.log(`Patient UUID ${patientBody.uuid}`);
-                    //Encounter response
-                    let encounterResponse = null;
-                    //Creating delivery encounter
-                    await this.createDeliveryEncounter(patientBody, deliveryData, locationUUID)
-                      .then(async (deliveryEncounter) => {
-                        //Encounter response
-                        encounterResponse = JSON.stringify(deliveryEncounter.body);
-                        console.log(
-                          "***************************** Creating Delivery Encounter ***************"
-                        );
-                        let encounter = deliveryEncounter.body;
-                        if (deliveryData.art_number) {
-                          this.asssiggnArtNumber(encounter.uuid, deliveryData.art_number).then((res) => {
-                            console.log(res)
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                        }
-                        // console.log(encounter);
-                        console.log(
-                          "***************************** Creating Infant Person ***************"
-                        );
-                        //Creating infant person
-                        await this.createInfantPatient(infantDeliveryData, deliveryData, locationUUID)
-                          .then(async (infant) => {
-                            // console.log(infant)
-                            console.log(
-                              `Successfully created infant person for = ${infantDeliveryData["infant_id"]}   ✅`
-                            );
-                            //Creating relationship infant-parent
-                            this.createInfantRelationShip(infant, deliveryData["ptracker_id"])
-                              .then((res) => {
-                                // console.log(res);
-                                console.log(
-                                  `Successfully created relationship for = ${infantDeliveryData["infant_id"]}   ✅`
-                                );
-                              })
-                              .catch((err) => {
-                                console.log(
-                                  `Error when creating relationship for = ${infantDeliveryData["infant_id"]}   🚫`
-                                );
-                              });
-                            //update openmrs status
-                            odkCentralStagingData
-                              .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `created`)
-                              .then((updateResponse) => {
-                                console.log(
-                                  `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
-                                );
-                                //update openmrs error table
-                                odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"],null);
-                              }).catch((error) => {
-                                console.log(error);
-                              });
-                          }).catch((err) => {
-                            console.log(
-                              `Error creating infant person for = ${infantDeliveryData["infant_id"]} :🚫\n`
-                            );
-                            //update openmrs status
-                            odkCentralStagingData
-                              .updateOpenmrsStatusLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `pending`)
-                              .then((updateResponse) => {
-                                odkCentralStagingData.updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`);
-                                console.log(
-                                  `ODK staging record submission_uuid = ${infantDeliveryData["infant_id"]}) Openmrs status updated successfully  ✅`
-                                );
-                                //update openmrs error table
-                                odkCentralStagingData.updateOpenmrsErrorMessageLD(stag_odk_delivery_infant, infantDeliveryData["infant_id"], `Error creating infant person for ${infantDeliveryData["infant_id"]},${encounterResponse}`);
-                                odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating infant person for ${deliveryData.submission_uuid},${encounterResponse}`);
-                              }).catch((error) => {
-                                console.log(error);
-                              });
-                          });
-                        console.log(
-                          "*****************************Getting Infant Obs ***************"
-                        );
-                        await this.getInfantObs(deliveryData["ptracker_id"], deliveryData["visit_date"], encounter)
-                          .then(async (infantObs) => {
-                            infantObs.forEach(async (result, index) => {
-                              //infant instance
-                              await this.infantChildInstance(index).then(async (res) => {
-                                let body = {
-                                  obsDatetime: deliveryData["visit_date"],
-                                  person: patientBody.uuid,
-                                  groupMembers: result,
-                                  encounter: encounter.uuid,
-                                  concept: res,
-                                };
-                                let options = {
-                                  method: "POST",
-                                  url: privateConfig.openmrsConfig.apiURL + `obs`,
-                                  qs: {},
-                                  headers: privateConfig.openmrsConfig.headers,
-                                  form: false,
-                                  auth: {
-                                    user: privateConfig.openmrsConfig.username,
-                                    pass: privateConfig.openmrsConfig.password,
-                                  },
-                                  json: true,
-                                  body: body,
-                                };
-                                return resolve(this.sendRequest(options));
-                              }).catch((error) => {
-                                console.log(error);
-                              });
-                            });
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-  
-                        console.log(
-                          `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
-                        );
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                            );
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, null);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      }).catch((err) => {
-                        console.log(
-                          `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
-                        );
-                        //update openmrs status
-                        odkCentralStagingData
-                          .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
-                          .then((updateResponse) => {
-                            console.log(
-                              `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
-                            );
-                            //update openmrs error table
-                            odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
-                          }).catch((error) => {
-                            console.log(error);
-                          });
-                      });
-                  }
+
+                      console.log(
+                        `Delivery Encounter successfully created for patient uuid = ${encounter.patient.uuid}   ✅`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, null);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    }).catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${deliveryData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(stag_odk_delivery, deliveryData.submission_uuid, `pending`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${deliveryData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_delivery, deliveryData.submission_uuid, `Error creating encounter for ${deliveryData.submission_uuid},${err}`);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    });
                 }
-              })
-            }
+              }
+            })
+          }
           );
-         }).catch((error) => {
-           console.log(error)
+        }).catch((error) => {
+          console.log(error)
         });
       });
     });
@@ -541,143 +544,143 @@ class OpenMrsAPI {
         let patientRecord = result.results;
         let currentPatient = null;
         //get facilityId by facility code
-      this.masterFacilityMapping(pncData["facility_code"]).then((facility_uuid)=>{
-        console.log(`Facility uuid is :`, facility_uuid);
-        this.getLocation(facility_uuid).then(async (location) => {
-          console.log(`Location for uuid :${facility_uuid} is :`, location.body.name);
-          this.checkIfLocationIsVoided(location.body).then(async (res) => {
-            //check retired value from openmrs
-            if (res == false) {
-              let locationUUID = location.body.uuid;
-              if (patientRecord.length > 0) {
-                console.log("**************Patient found********** ");
-                currentPatient = patientRecord[0];
-                //Encounter response
-                let encounterResponse = null;
-                //creating encounter
-                await this.createMotherPNCEncounter(currentPatient, pncData, locationUUID)
-                  .then((pncMotherEncounter) => {
-                    //Encounter response
-                    encounterResponse = JSON.stringify(pncMotherEncounter.body);
-                    console.log(
-                      "***************************** Creating PNC Mother Encounter ***************"
-                    );
-                    console.log(
-                      `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
-                    );
-                    if (pncData.art_number) {
-                      this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid, pncData.art_number).then((res) => {
-                        console.log(res)
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                    }
-                    // return resolve(ancEncounter);
-                    //update openmrs status
-                    odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_mother, pncData.submission_uuid, `sent`)
-                      .then((updateResponse) => {
-                        console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_mother, pncData.submission_uuid, null);
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                  })
-                  .catch((err) => {
-                    console.log(
-                      `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(
-                        stag_odk_pnc_mother,
-                        pncData.submission_uuid,
-                        `pending`
-                      )
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(
+        this.masterFacilityMapping(pncData["facility_code"]).then((facility_uuid) => {
+          console.log(`Facility uuid is :`, facility_uuid);
+          this.getLocation(facility_uuid).then(async (location) => {
+            console.log(`Location for uuid :${facility_uuid} is :`, location.body.name);
+            this.checkIfLocationIsVoided(location.body).then(async (res) => {
+              //check retired value from openmrs
+              if (res == false) {
+                let locationUUID = location.body.uuid;
+                if (patientRecord.length > 0) {
+                  console.log("**************Patient found********** ");
+                  currentPatient = patientRecord[0];
+                  //Encounter response
+                  let encounterResponse = null;
+                  //creating encounter
+                  await this.createMotherPNCEncounter(currentPatient, pncData, locationUUID)
+                    .then((pncMotherEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(pncMotherEncounter.body);
+                      console.log(
+                        "***************************** Creating PNC Mother Encounter ***************"
+                      );
+                      console.log(
+                        `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
+                      );
+                      if (pncData.art_number) {
+                        this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid, pncData.art_number).then((res) => {
+                          console.log(res)
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                      }
+                      // return resolve(ancEncounter);
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_mother, pncData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_mother, pncData.submission_uuid, null);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(
                           stag_odk_pnc_mother,
                           pncData.submission_uuid,
-                          `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
-                        );
-                      })
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  });
-              } else {
-                console.log("**************Creating new Patient************* ");
-                let patient = await this.createPatient(pncData, locationUUID);
-                let patientBody = patient.body;
-                console.log(`Patient UUID ${patientBody.uuid}`);
-                //Encounter response
-                let encounterResponse = null;
-                //creating encounter
-                await this.createMotherPNCEncounter(patientBody, pncData, locationUUID)
-                  .then((pncMotherEncounter) => {
-                    //Encounter response
-                    encounterResponse = JSON.stringify(pncMotherEncounter.body);
-                    console.log(
-                      "***************************** Creating PNC Mother Encounter ***************"
-                    );
-                    console.log(
-                      `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
-                    );
-                    if (pncData.art_number) {
-                      this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid, pncData.art_number).then((res) => {
-                        console.log(res)
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                    }
-                    // return resolve(ancEncounter);
-                    //update openmrs status
-                    odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_mother, pncData.submission_uuid, `sent`)
-                      .then((updateResponse) => {
-                        console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_mother, pncData.submission_uuid, null);
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                  })
-                  .catch((err) => {
-                    console.log(
-                      `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(
-                        stag_odk_pnc_mother,
-                        pncData.submission_uuid,
-                        `pending`
-                      )
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(
+                          `pending`
+                        )
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(
+                            stag_odk_pnc_mother,
+                            pncData.submission_uuid,
+                            `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
+                          );
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                } else {
+                  console.log("**************Creating new Patient************* ");
+                  let patient = await this.createPatient(pncData, locationUUID);
+                  let patientBody = patient.body;
+                  console.log(`Patient UUID ${patientBody.uuid}`);
+                  //Encounter response
+                  let encounterResponse = null;
+                  //creating encounter
+                  await this.createMotherPNCEncounter(patientBody, pncData, locationUUID)
+                    .then((pncMotherEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(pncMotherEncounter.body);
+                      console.log(
+                        "***************************** Creating PNC Mother Encounter ***************"
+                      );
+                      console.log(
+                        `Encounter successfully created for patient uuid = ${pncMotherEncounter.body.patient.uuid}`
+                      );
+                      if (pncData.art_number) {
+                        this.asssiggnArtNumber(pncMotherEncounter.body.patient.uuid, pncData.art_number).then((res) => {
+                          console.log(res)
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                      }
+                      // return resolve(ancEncounter);
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_mother, pncData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_mother, pncData.submission_uuid, null);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(
                           stag_odk_pnc_mother,
                           pncData.submission_uuid,
-                          `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
-                        );
-                      })
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  });
+                          `pending`
+                        )
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(
+                            stag_odk_pnc_mother,
+                            pncData.submission_uuid,
+                            `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
+                          );
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                }
               }
-            }
-          })
+            })
+          });
+        }).catch((error) => {
+          console.log(error);
         });
-      }).catch((error) => {
-        console.log(error);
-      });
       });
     });
   }
@@ -691,162 +694,162 @@ class OpenMrsAPI {
         let patientRecord = result.results;
         let currentPatient = null;
         //get facilityId by facility code
-      this.masterFacilityMapping(pncData["facility_code"]).then((facility_uuid)=>{
-        console.log(`Facility uuid is :`, facility_uuid);
-        this.getLocation(facility_uuid).then(async (location) => {
-          console.log(`Location for uuid :${facility_uuid} is :`, location.name);
-          this.checkIfLocationIsVoided(location.body).then(async (res) => {
-            //check retired value from openmrs
-            if (res == false) {
-              let locationUUID = location.body.uuid;
-              if (patientRecord.length > 0) {
-                console.log(
-                  "**************Patient found with specified identifier **********"
-                );
-                currentPatient = patientRecord[0];
-                //Encounter response
-                let encounterResponse = null;
-                //creating encounter
-                await this.createInfantPNCEncounter(currentPatient, pncData, locationUUID)
-                  .then((pncInfantEncounter) => {
-                    //Encounter response
-                    encounterResponse = JSON.stringify(pncInfantEncounter.body);
-                    console.log(
-                      "***************************** Creating PNC Infant Encounter ***************"
-                    );
-                    console.log(pncInfantEncounter.body)
-                    console.log(
-                      `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
-                    );
-                    if (pncData.art_number) {
-                      this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid, pncData.art_number).then((res) => {
-                        console.log(res)
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                    }
-                    // return resolve(ancEncounter);
-                    //update openmrs status
-                    odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_infant, pncData.submission_uuid, `sent`)
-                      .then((updateResponse) => {
-                        console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_infant, pncData.submission_uuid, null);
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                  })
-                  .catch((err) => {
-                    console.log(
-                      `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(
-                        stag_odk_pnc_infant,
-                        pncData.submission_uuid,
-                        `pending`
-                      )
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(
-                          stag_odk_pnc_infant,
-                          pncData.submission_uuid,
-                          `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
-                        );
-                      })
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  });
-              } else {
-                console.log("**************Creating new Patient************* ");
-                let newPatient = await this.createPatient(pncData, locationUUID);
-                let patientBody = newPatient.body;
-                console.log(`Patient UUID ${patientBody.uuid}`);
-                //Encounter response
-                let encounterResponse = null;
-                //creating encounter
-                await this.createInfantPNCEncounter(patientBody, pncData, locationUUID)
-                  .then((pncInfantEncounter) => {
-                    //Encounter response
-                    encounterResponse = JSON.stringify(pncInfantEncounter.body);
-                    console.log(
-                      "***************************** Creating PNC Infant Encounter ***************"
-                    );
-                    console.log(
-                      `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
-                    );
-                    if (pncData.art_number) {
-                      this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid, pncData.art_number).then((res) => {
-                        console.log(res)
-                      }).catch((error) => {
-                        console.log(error);
-                      });
-                    }
-                    // return resolve(ancEncounter);
-                    //Creating relationship infant-parent
-                    if (pncData["parent_ptracker_id"]) {
-                      console.log("**********************linking mother to child**********************");
-                      this.createRelationShip(newPatient, pncData["parent_ptracker_id"])
-                        .then((patientLink) => {
-                          console.log(patientLink)
-                          console.log(
-                            "****************linked mother to child**********************"
-                          );
+        this.masterFacilityMapping(pncData["facility_code"]).then((facility_uuid) => {
+          console.log(`Facility uuid is :`, facility_uuid);
+          this.getLocation(facility_uuid).then(async (location) => {
+            console.log(`Location for uuid :${facility_uuid} is :`, location.name);
+            this.checkIfLocationIsVoided(location.body).then(async (res) => {
+              //check retired value from openmrs
+              if (res == false) {
+                let locationUUID = location.body.uuid;
+                if (patientRecord.length > 0) {
+                  console.log(
+                    "**************Patient found with specified identifier **********"
+                  );
+                  currentPatient = patientRecord[0];
+                  //Encounter response
+                  let encounterResponse = null;
+                  //creating encounter
+                  await this.createInfantPNCEncounter(currentPatient, pncData, locationUUID)
+                    .then((pncInfantEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(pncInfantEncounter.body);
+                      console.log(
+                        "***************************** Creating PNC Infant Encounter ***************"
+                      );
+                      console.log(pncInfantEncounter.body)
+                      console.log(
+                        `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
+                      );
+                      if (pncData.art_number) {
+                        this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid, pncData.art_number).then((res) => {
+                          console.log(res)
                         }).catch((error) => {
-                          console.error(`Error linking infant to parent: ${error} 🚫`);
+                          console.log(error);
                         });
-                    }
-                    //update openmrs status
-                    odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_infant, pncData.submission_uuid, `sent`)
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_infant, pncData.submission_uuid, null);
-                      })
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  })
-                  .catch((err) => {
-                    console.log(
-                      `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
-                    );
-                    //update openmrs status
-                    odkCentralStagingData
-                      .updateOpenmrsStatus(
-                        stag_odk_pnc_infant,
-                        pncData.submission_uuid,
-                        `pending`
-                      )
-                      .then((updateResponse) => {
-                        console.log(
-                          `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
-                        );
-                        //update openmrs error table
-                        odkCentralStagingData.updateOpenmrsErrorMessage(
+                      }
+                      // return resolve(ancEncounter);
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_infant, pncData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(`ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`);
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_infant, pncData.submission_uuid, null);
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(
                           stag_odk_pnc_infant,
                           pncData.submission_uuid,
-                          `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
-                        );
-                      })
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  });
+                          `pending`
+                        )
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(
+                            stag_odk_pnc_infant,
+                            pncData.submission_uuid,
+                            `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
+                          );
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                } else {
+                  console.log("**************Creating new Patient************* ");
+                  let newPatient = await this.createPatient(pncData, locationUUID);
+                  let patientBody = newPatient.body;
+                  console.log(`Patient UUID ${patientBody.uuid}`);
+                  //Encounter response
+                  let encounterResponse = null;
+                  //creating encounter
+                  await this.createInfantPNCEncounter(patientBody, pncData, locationUUID)
+                    .then((pncInfantEncounter) => {
+                      //Encounter response
+                      encounterResponse = JSON.stringify(pncInfantEncounter.body);
+                      console.log(
+                        "***************************** Creating PNC Infant Encounter ***************"
+                      );
+                      console.log(
+                        `Encounter successfully created for patient uuid = ${pncInfantEncounter.body.patient.uuid}`
+                      );
+                      if (pncData.art_number) {
+                        this.asssiggnArtNumber(pncInfantEncounter.body.patient.uuid, pncData.art_number).then((res) => {
+                          console.log(res)
+                        }).catch((error) => {
+                          console.log(error);
+                        });
+                      }
+                      // return resolve(ancEncounter);
+                      //Creating relationship infant-parent
+                      if (pncData["parent_ptracker_id"]) {
+                        console.log("**********************linking mother to child**********************");
+                        this.createRelationShip(newPatient, pncData["parent_ptracker_id"])
+                          .then((patientLink) => {
+                            console.log(patientLink)
+                            console.log(
+                              "****************linked mother to child**********************"
+                            );
+                          }).catch((error) => {
+                            console.error(`Error linking infant to parent: ${error} 🚫`);
+                          });
+                      }
+                      //update openmrs status
+                      odkCentralStagingData.updateOpenmrsStatus(stag_odk_pnc_infant, pncData.submission_uuid, `sent`)
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(stag_odk_pnc_infant, pncData.submission_uuid, null);
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(
+                        `Error creating encounter for patient uuid = ${pncData.submission_uuid},${err} :🚫\n`
+                      );
+                      //update openmrs status
+                      odkCentralStagingData
+                        .updateOpenmrsStatus(
+                          stag_odk_pnc_infant,
+                          pncData.submission_uuid,
+                          `pending`
+                        )
+                        .then((updateResponse) => {
+                          console.log(
+                            `ODK staging record submission_uuid = ${pncData.submission_uuid}) Openmrs status updated successfully  ✅`
+                          );
+                          //update openmrs error table
+                          odkCentralStagingData.updateOpenmrsErrorMessage(
+                            stag_odk_pnc_infant,
+                            pncData.submission_uuid,
+                            `Error creating encounter for ${pncData.submission_uuid},${encounterResponse}`
+                          );
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    });
+                }
               }
-            }
-          })
+            })
+          });
+        }).catch((error) => {
+          console.log(error);
         });
-      }).catch((error) => {
-        console.log(error);
-      });
       });
     });
   }
@@ -922,8 +925,11 @@ class OpenMrsAPI {
     console.log("*******************PRINTING ANC obs*********************");
     let obs = await this.getObs(ancData);
     console.log(obs);
-    console.log("*******************fetching ANC obs*********************");
 
+    console.log("*******************Getting Provider UUID*********************");
+    let provider_uuid=await this.getProviderId(ancData).then((res=>{return res}));
+
+    console.log("*******************fetching ANC obs*********************");
     let body = {
       encounterDatetime: ancData["visit_date"],
       patient: newPatient.uuid,
@@ -931,7 +937,7 @@ class OpenMrsAPI {
       location: locationUUID,
       encounterProviders: [
         {
-          provider: uuids.encounters.odk_user_provider_uuid,
+          provider: provider_uuid,
           encounterRole: uuids.encounters.encounter_role_uuid,
         },
       ],
@@ -980,6 +986,9 @@ class OpenMrsAPI {
     let obs = await this.getMotherPNCObs(motherPncData);
     console.log("*******************obs*********************");
     console.log(obs);
+    console.log("*******************Getting Provider UUID*********************");
+    let provider_uuid=await this.getProviderId(motherPncData).then((res=>{return res}));
+
     let body = {
       encounterDatetime: motherPncData["visit_date"],
       patient: newPatient.uuid,
@@ -987,7 +996,7 @@ class OpenMrsAPI {
       location: locationUUID,
       encounterProviders: [
         {
-          provider: uuids.encounters.odk_user_provider_uuid,
+          provider: provider_uuid,
           encounterRole: uuids.encounters.encounter_role_uuid,
         },
       ],
@@ -1014,6 +1023,8 @@ class OpenMrsAPI {
     let obs = await this.getInfantPNCObs(infantPncData);
     console.log("*******************obs*********************");
     console.log(obs);
+    console.log("*******************Getting Provider UUID*********************");
+    let provider_uuid=await this.getProviderId(infantPncData).then((res=>{return res}));
 
     let body = {
       encounterDatetime: infantPncData["visit_date"],
@@ -1022,7 +1033,7 @@ class OpenMrsAPI {
       location: locationUUID,
       encounterProviders: [
         {
-          provider: uuids.encounters.odk_user_provider_uuid,
+          provider: provider_uuid,
           encounterRole: uuids.encounters.encounter_role_uuid,
         },
       ],
@@ -1045,10 +1056,13 @@ class OpenMrsAPI {
     return this.sendRequest(options);
   }
 
-  createDeliveryEncounter(newPatient, data, locationUUID) {
-    return new Promise((resolve, reject) => {
+  async createDeliveryEncounter(newPatient, data, locationUUID) {
+    return new Promise(async(resolve, reject) => {
       console.log("*******************delivery obs*********************");
       let obs = this.getDeliveryObs(data);
+      console.log("*******************Getting Provider UUID*********************");
+      let provider_uuid=await this.getProviderId(data).then((res=>{return res}));
+
       let body = {
         encounterDatetime: data["visit_date"],
         patient: newPatient.uuid,
@@ -1056,7 +1070,7 @@ class OpenMrsAPI {
         location: locationUUID,
         encounterProviders: [
           {
-            provider: uuids.encounters.odk_user_provider_uuid,
+            provider:provider_uuid,
             encounterRole: uuids.encounters.encounter_role_uuid,
           },
         ],
@@ -1125,6 +1139,21 @@ class OpenMrsAPI {
     return "";
 
   }
+  //get provider uuid
+  async getProviderId(data) {
+    return await provider.getSystemId(data.username).then((res => {
+      let system_uuid = res.body.results[0].systemId;
+      //get provider uuid
+      return provider.getProviderUuid(system_uuid).then((result) => {
+        let uuid = result.body.results[0].uuid;
+        return uuid;
+      }).catch((error) => {
+        console.log(error);
+      });
+    })).catch((error) => {
+      console.log(error);
+    });
+  }
   //Create patient
   async createPatient(data, locationUUID) {
     var country = await this.countryMapping(data["country"]);
@@ -1154,7 +1183,7 @@ class OpenMrsAPI {
     let personBody = person.body;
     // console.log(personBody.body);
     console.log("***************Getting location****************");
-    let facility_uuid= await this.masterFacilityMapping(data["facility_code"]);
+    let facility_uuid = await this.masterFacilityMapping(data["facility_code"]);
     let location = await this.getLocation(facility_uuid);
     let locationBody = location.body;
 
@@ -1233,7 +1262,7 @@ class OpenMrsAPI {
       console.log(infantData);
       console.log(personBody.body);
       console.log("***************Getting location****************");
-      let facility_uuid= await this.masterFacilityMapping(motherData["facility_code"]);
+      let facility_uuid = await this.masterFacilityMapping(motherData["facility_code"]);
       let location = await this.getLocation(facility_uuid);
       let locationBody = location.body;
 
@@ -2931,45 +2960,6 @@ class OpenMrsAPI {
           return reject(error);
         });
     });
-  }
-
-  postANCEncounter(rec) {
-    if (ancData) {
-      let options = {
-        method: "POST",
-        url: privateConfig.openmrsConfig.apiURL + `encounter`,
-        qs: {},
-        headers: privateConfig.headers,
-        form: false,
-        auth: {
-          user: privateConfig.openmrsConfig.username,
-          pass: config.password,
-        },
-        json: true,
-        body: {
-          encounterDatetime: ancData.collect_date,
-          patient: patient_uuid,
-          encounterType: uuids.encounters.ancEncounter,
-          location: uuids.encounters.unknown_location_uuid,
-          // encounterProviders: [{
-          //     provider: uuids.encounters.provider_uuid,
-          //     encounterRole: uuids.encounters.encounter_role_uuid
-          // }],
-          form: uuids.form_uuid,
-          obs: this.parseObservationsANCEncounter(
-            patient_uuid,
-            anData.collect_date,
-            ancData,
-            null
-          ),
-        },
-      };
-      return this.sendRequest(options);
-    } else {
-      return Promise.reject(
-        `- Cannot create lab encounter without ANC data result data.\n`
-      );
-    }
   }
 }
 

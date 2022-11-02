@@ -1,7 +1,9 @@
 const request = require('request');
 const privateConfig = require('../config/private-config.json');
 const uuids = require('../config/uuid-dictionary.json')
-const facilities = require('../config/mflCodes.json')
+const facilities = require('../config/mflCodes.json');
+const { OpenMrsAPI } = require("./OpenMrsAPI");
+const OpenMrsAPIObject = new OpenMrsAPI();
 
 class PNCInfant {
 
@@ -56,10 +58,12 @@ class PNCInfant {
 
     })
 }
-  createInfantPNCEncounter(newPatient, infantPncData, locationUUID) {
+  async createInfantPNCEncounter(newPatient, infantPncData, locationUUID) {
     let obs = this.getObs(infantPncData)
     console.log("*******************obs*********************")
     console.log(obs)
+	console.log("*******************Getting Provider UUID*********************");
+    let provider_uuid= await OpenMrsAPIObject.getProviderId(infantPncData).then((res=>{return res}));
 
     let body = {
         encounterDatetime: infantPncData['visit_date'],
@@ -67,7 +71,7 @@ class PNCInfant {
         encounterType: uuids.encounters.infant_pnc,
         location: locationUUID,
         encounterProviders: [{
-            provider: uuids.encounters.odk_user_provider_uuid,
+            provider:provider_uuid,
             encounterRole: uuids.encounters.encounter_role_uuid
         }],
         form: uuids.forms.infant_pnc_form,
